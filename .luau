@@ -92,7 +92,7 @@ local MainTitle = Instance.new("TextLabel", mainFrame)
 MainTitle.Size = UDim2.new(1, 0, 0, 35)
 MainTitle.Position = UDim2.new(0, 0, 0, 2)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Text = "FLING DELUXE 1.5"
+MainTitle.Text = "FLING DELUXE 1.6"
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainTitle.TextSize = 12
 MainTitle.Font = Enum.Font.GothamBold
@@ -821,6 +821,68 @@ local conn = Mouse.Button1Down:Connect(function()
                 Fling_Deluxe(TP)
             end
         end
+    end
+end)
+
+local AntiFlingFrame = Instance.new("Frame", scrollFrame)
+AntiFlingFrame.Size = UDim2.new(1, -4, 0, 80)
+AntiFlingFrame.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+Instance.new("UICorner", AntiFlingFrame).CornerRadius = UDim.new(0, 6)
+
+local AntiFlingTitle = Instance.new("TextLabel", AntiFlingFrame)
+AntiFlingTitle.Size = UDim2.new(1, 0, 0, 25)
+AntiFlingTitle.BackgroundTransparency = 1
+AntiFlingTitle.Text = "ANTI-FLING"
+AntiFlingTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+AntiFlingTitle.TextSize = 10
+AntiFlingTitle.Font = Enum.Font.GothamBold
+
+local AntiFlingButton = Instance.new("TextButton", AntiFlingFrame)
+AntiFlingButton.Size = UDim2.new(0, 180, 0, 28)
+AntiFlingButton.Position = UDim2.new(0.5, -90, 0, 38)
+AntiFlingButton.Text = "Status: OFF"
+AntiFlingButton.TextSize = 11
+AntiFlingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+AntiFlingButton.Font = Enum.Font.GothamMedium
+AntiFlingButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+Instance.new("UICorner", AntiFlingButton).CornerRadius = UDim.new(0, 4)
+
+
+local antifling = nil
+
+local function startAntiFling()
+    antifling = RunService.Stepped:Connect(function()
+        pcall(function()
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr ~= player and plr.Character then
+                    for _, part in pairs(plr.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end
+        end)
+    end)
+end
+
+local function stopAntiFling()
+    if antifling then
+        antifling:Disconnect()
+        antifling = nil
+    end
+end
+
+
+MouseButtonFix(AntiFlingButton, function()
+    if antifling then
+        stopAntiFling()
+        AntiFlingButton.Text = "Status: OFF"
+        AntiFlingButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    else
+        startAntiFling()
+        AntiFlingButton.Text = "Status: ON"
+        AntiFlingButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
     end
 end)
 
