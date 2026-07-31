@@ -50,6 +50,35 @@ mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25) 
 
+local CloseButton = Instance.new("TextButton", mainFrame)
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 24, 0, 24)
+CloseButton.Position = UDim2.new(1, -32, 0, 7)
+CloseButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+CloseButton.TextSize = 12
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.BorderSizePixel = 0
+CloseButton.ZIndex = 10
+
+local CloseCorner = Instance.new("UICorner", CloseButton)
+CloseCorner.CornerRadius = UDim.new(0, 5)
+
+CloseButton.MouseEnter:Connect(function()
+    CloseButton.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
+
+CloseButton.MouseLeave:Connect(function()
+    CloseButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    CloseButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+end)
+
+CloseButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 10)
 corner.Parent = mainFrame
@@ -63,7 +92,7 @@ local MainTitle = Instance.new("TextLabel", mainFrame)
 MainTitle.Size = UDim2.new(1, 0, 0, 35)
 MainTitle.Position = UDim2.new(0, 0, 0, 2)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Text = "FLING DELUXE 1.4"
+MainTitle.Text = "FLING DELUXE 1.5"
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainTitle.TextSize = 12
 MainTitle.Font = Enum.Font.GothamBold
@@ -794,3 +823,4 @@ local conn = Mouse.Button1Down:Connect(function()
         end
     end
 end)
+
