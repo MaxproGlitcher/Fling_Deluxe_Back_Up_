@@ -290,20 +290,22 @@ local function updateSearchList()
         if item:IsA("TextButton") then item:Destroy() end
     end
     
-    local text = targetTextBox.Text:lower()
+    local text = targetTextBox.Text:lower():gsub("%s+", "")
     local matches = {}
-    
+
     table.insert(matches, "None")
-    
+
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= player then
-            if text == "" or p.Name:lower():find(text) or p.DisplayName:lower():find(text) then
+            local name = p.Name:lower():gsub("%s+", "")
+            local dname = p.DisplayName:lower():gsub("%s+", "")
+            if text == "" or name:find(text) or dname:find(text) then
                 table.insert(matches, p.Name)
             end
         end
     end
     
-    for i, name in ipairs(matches) do
+    for _, name in ipairs(matches) do
         local btn = Instance.new("TextButton", searchScroll)
         btn.Size = UDim2.new(1, 0, 0, 24)
         btn.BackgroundTransparency = 1
@@ -329,14 +331,23 @@ local function updateSearchList()
                     loopTargeting = false
                     toggleButtonLoop.Text = "Loop Target: OFF"
                     toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                    if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
                 end
             else
                 targetTextBox.Text = name
             end
+
             searchScroll.Visible = false
+            targetTextBox:ReleaseFocus()
+            updateSearchList()
         end)
     end
 end
+
+targetTextBox:GetPropertyChangedSignal("Text"):Connect(function()
+    updateSearchList()
+end)
+
 
 targetTextBox.Focused:Connect(function()
     updateSearchPosition()
@@ -350,7 +361,7 @@ targetTextBox:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end)
 
--- TRACKER EN TEMPS RÉEL (REJOINT / QUITTE)
+
 Players.PlayerAdded:Connect(function(newPlayer)
     if searchScroll.Visible then
         updateSearchList()
@@ -358,7 +369,7 @@ Players.PlayerAdded:Connect(function(newPlayer)
 end)
 
 Players.PlayerRemoving:Connect(function(leftPlayer)
-    -- Si le joueur ciblé quitte le serveur, on nettoie le TextBox et coupe le Fling
+    
     if targetTextBox.Text:lower() == leftPlayer.Name:lower() then
         targetTextBox.Text = ""
         if loopTargeting then
@@ -477,28 +488,32 @@ local function startLoopTargetAction()
                 continue 
             end
 
-            local AllBool = false
-            local GetPlayer = function(Name)
-                Name = Name:lower()
-                if Name == "all" or Name == "others" then
-                    AllBool = true
-                    return
-                elseif Name == "random" then
-                    local GetPlayers = Players:GetPlayers()
-                    if Discover(GetPlayers, player) then table.remove(GetPlayers, Discover(GetPlayers, player)) end
-                    return GetPlayers[math.random(#GetPlayers)]
-                else
-                    for _, x in next, Players:GetPlayers() do
-                        if x ~= player then
-                            if x.Name:lower():match("^"..Name) then
-                                return x
-                            elseif x.DisplayName:lower():match("^"..Name) then
-                                return x
-                            end
-                        end
-                    end
+        
+ local GetPlayer = function(Name)
+    Name = Name:lower():gsub("%s+", "") 
+
+    if Name == "all" or Name == "others" then
+        AllBool = true
+        return
+    elseif Name == "random" then
+        local GetPlayers = Players:GetPlayers()
+        if Discover(GetPlayers, player) then
+            table.remove(GetPlayers, Discover(GetPlayers, player))
+        end
+        return GetPlayers[math.random(#GetPlayers)]
+    else
+        for _, x in next, Players:GetPlayers() do
+            if x ~= player then
+                local n = x.Name:lower():gsub("%s+", "")
+                local d = x.DisplayName:lower():gsub("%s+", "")
+                if n:match("^"..Name) or d:match("^"..Name) then
+                    return x
                 end
             end
+        end
+    end
+ end      
+
 
             local FlingDeluxePro = function(TargetPlayer)
                 if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
@@ -885,4 +900,3 @@ MouseButtonFix(AntiFlingButton, function()
         AntiFlingButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
     end
 end)
-
