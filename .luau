@@ -92,7 +92,7 @@ local MainTitle = Instance.new("TextLabel", mainFrame)
 MainTitle.Size = UDim2.new(1, 0, 0, 35)
 MainTitle.Position = UDim2.new(0, 0, 0, 2)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Text = "FLING DELUXE 1.7"
+MainTitle.Text = "FLING DELUXE 1.8"
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainTitle.TextSize = 12
 MainTitle.Font = Enum.Font.GothamBold
@@ -222,7 +222,7 @@ toggleButtonRight.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 Instance.new("UICorner", toggleButtonRight).CornerRadius = UDim.new(0, 4)
 
 local TargetModuleFrame = Instance.new("Frame", scrollFrame)
-TargetModuleFrame.Size = UDim2.new(1, -4, 0, 110) 
+TargetModuleFrame.Size = UDim2.new(1, -4, 0, 148) 
 TargetModuleFrame.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
 Instance.new("UICorner", TargetModuleFrame).CornerRadius = UDim.new(0, 6)
 
@@ -236,7 +236,7 @@ TargetTitle.Font = Enum.Font.GothamBold
 
 local targetTextBox = Instance.new("TextBox", TargetModuleFrame)
 targetTextBox.Size = UDim2.new(0, 180, 0, 26)
-targetTextBox.Position = UDim2.new(0.5, -90, 0, 32)
+targetTextBox.Position = UDim2.new(0.5, -90, 0, 30)
 targetTextBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 targetTextBox.Text = ""
 targetTextBox.PlaceholderText = "Target Username..."
@@ -251,8 +251,8 @@ textBoxStroke.Color = Color3.fromRGB(50, 50, 50)
 textBoxStroke.Thickness = 1
 
 local toggleButtonLoop = InstanceNew("TextButton", TargetModuleFrame)
-toggleButtonLoop.Size = UDim2.new(0, 180, 0, 28) 
-toggleButtonLoop.Position = UDim2.new(0.5, -90, 0, 68)
+toggleButtonLoop.Size = UDim2.new(0, 180, 0, 26) 
+toggleButtonLoop.Position = UDim2.new(0.5, -90, 0, 64)
 toggleButtonLoop.Text = "Loop Target: OFF"
 toggleButtonLoop.TextSize = 11
 toggleButtonLoop.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -260,6 +260,15 @@ toggleButtonLoop.Font = Enum.Font.GothamMedium
 toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 Instance.new("UICorner", toggleButtonLoop).CornerRadius = UDim.new(0, 4)
 
+local toggleButtonLoopAll = InstanceNew("TextButton", TargetModuleFrame)
+toggleButtonLoopAll.Size = UDim2.new(0, 180, 0, 26) 
+toggleButtonLoopAll.Position = UDim2.new(0.5, -90, 0, 98)
+toggleButtonLoopAll.Text = "Loop Target All: OFF"
+toggleButtonLoopAll.TextSize = 11
+toggleButtonLoopAll.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButtonLoopAll.Font = Enum.Font.GothamMedium
+toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+Instance.new("UICorner", toggleButtonLoopAll).CornerRadius = UDim.new(0, 4)
 
 local searchScroll = Instance.new("ScrollingFrame", screenGui)
 searchScroll.Size = UDim2.new(0, 180, 0, 120)
@@ -426,6 +435,7 @@ MouseButtonFix(toggleButtonTween, function()
     end
 end)
 
+
 local function startWalkFlingLoop()
     local char = player.Character
     local hum = getPlrHum(char)
@@ -482,46 +492,55 @@ end)
 local function startLoopTargetAction()
     task.spawn(function()
         while loopTargeting do
-            local targetName = targetTextBox.Text
+            local targetName = targetTextBox.Text:lower():gsub("%s+", "")
             if targetName == "" then 
-                Wait(0.1)
+                task.wait(0.1)
                 continue 
             end
 
-        
- local GetPlayer = function(Name)
-    Name = Name:lower():gsub("%s+", "") 
+            local isAll = (targetName == "all" or targetName == "others")
 
-    if Name == "all" or Name == "others" then
-        AllBool = true
-        return
-    elseif Name == "random" then
-        local GetPlayers = Players:GetPlayers()
-        if Discover(GetPlayers, player) then
-            table.remove(GetPlayers, Discover(GetPlayers, player))
-        end
-        return GetPlayers[math.random(#GetPlayers)]
-    else
-        for _, x in next, Players:GetPlayers() do
-            if x ~= player then
-                local n = x.Name:lower():gsub("%s+", "")
-                local d = x.DisplayName:lower():gsub("%s+", "")
-                if n:match("^"..Name) or d:match("^"..Name) then
-                    return x
+            local GetPlayer = function(Name)
+                if Name == "random" then
+                    local GetPlayers = Players:GetPlayers()
+                    if Discover(GetPlayers, player) then
+                        table.remove(GetPlayers, Discover(GetPlayers, player))
+                    end
+                    if #GetPlayers > 0 then
+                        return GetPlayers[math.random(#GetPlayers)]
+                    end
+                else
+                    for _, x in next, Players:GetPlayers() do
+                        if x ~= player then
+                            local n = x.Name:lower():gsub("%s+", "")
+                            local d = x.DisplayName:lower():gsub("%s+", "")
+                            if n:match("^"..Name) or d:match("^"..Name) then
+                                return x
+                            end
+                        end
+                    end
                 end
-            end
-        end
-    end
- end      
-
+                return nil
+            end      
 
             local FlingDeluxePro = function(TargetPlayer)
+                if not TargetPlayer or not TargetPlayer.Parent or TargetPlayer == player then return end
+                
                 if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
+                
                 local Character = player.Character
                 local Humanoid = getPlrHum(Character)
                 local HRP = Humanoid and Humanoid.RootPart
                 local camera = workspace.CurrentCamera
                 
+                if not Character or not Humanoid or not HRP or Humanoid.Health <= 0 then return end
+                
+                local TCharacter = TargetPlayer.Character
+                if not TCharacter or not TCharacter.Parent then return end
+                
+                local THumanoid = getPlrHum(TCharacter)
+                if not THumanoid or THumanoid.Health <= 0 then return end
+
                 LOOPPROTECT = InstanceNew("Part")
                 LOOPPROTECT.Size = Vector3.new(1, 1, 1)
                 LOOPPROTECT.Transparency = 1
@@ -541,33 +560,26 @@ local function startLoopTargetAction()
                 bodyGyro.Parent = LOOPPROTECT
                 
                 local RootPart = HRP
-                local TCharacter = TargetPlayer.Character
-                local THumanoid, TRootPart, THead, Accessory, Handle
+                local TRootPart = THumanoid.RootPart
+                local THead = getHead(TCharacter)
+                local Accessory = TCharacter:FindFirstChildOfClass("Accessory")
+                local Handle = Accessory and Accessory:FindFirstChild("Handle")
                 
-                if not TCharacter then if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end return end
-                if getPlrHum(TCharacter) then THumanoid = getPlrHum(TCharacter) end
-                if THumanoid and THumanoid.RootPart then TRootPart = THumanoid.RootPart end
-                if getHead(TCharacter) then THead = getHead(TCharacter) end
-                if TCharacter:FindFirstChildOfClass("Accessory") then Accessory = TCharacter:FindFirstChildOfClass("Accessory") end
-                if Accessory and Accessory:FindFirstChild("Handle") then Handle = Accessory.Handle end
+                if not flingManager.lFlingOldPos or RootPart.Velocity.Magnitude < 50 then
+                    flingManager.lFlingOldPos = RootPart.CFrame
+                end
                 
-                if Character and Humanoid and HRP then
-                    if not flingManager.lFlingOldPos or RootPart.Velocity.Magnitude < 50 then
-                        flingManager.lFlingOldPos = RootPart.CFrame
-                    end
-                    if THumanoid and THumanoid.Sit and not AllBool then return end
-                    
+                if TCharacter:FindFirstChildWhichIsA("BasePart") then
                     if THead then
                         workspace.CurrentCamera.CameraSubject = THead
-                    elseif not THead and Handle then
+                    elseif Handle then
                         workspace.CurrentCamera.CameraSubject = Handle
-                    elseif THumanoid and TRootPart then
+                    elseif THumanoid then
                         workspace.CurrentCamera.CameraSubject = THumanoid
                     end
                     
-                    if not TCharacter or not TCharacter:FindFirstChildWhichIsA("BasePart") then return end
-                    
                     local FPos = function(BasePart, Pos, Ang)
+                        if not RootPart or not Character then return end
                         RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
                         Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
                         RootPart.Velocity = Vector3.new(9e7, 9e7 * 10, 9e7)
@@ -579,32 +591,31 @@ local function startLoopTargetAction()
                         local Time = tick()
                         local Angle = 0
                         repeat
-                            if RootPart and THumanoid and TCharacter and TCharacter.Parent then
+                            if RootPart and THumanoid and TCharacter and TCharacter.Parent and THumanoid.Health > 0 then
                                 if BasePart.Velocity.Magnitude < 50 then
                                     Angle = Angle + 100
-                                    FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0)) Wait()
+                                    FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
                                 else
-                                    FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, -1.5, -THumanoid.WalkSpeed), CFrame.Angles(0, 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, -1.5, -TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(0, 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, 1.5, TRootPart.Velocity.Magnitude / 1.25), CFrame.Angles(math.rad(90), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(-90), 0, 0)) Wait()
-                                    FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0)) Wait()
+                                    FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, -1.5, -THumanoid.WalkSpeed), CFrame.Angles(0, 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, 1.5, TRootPart and TRootPart.Velocity.Magnitude / 1.25 or 0), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, -1.5, -(TRootPart and TRootPart.Velocity.Magnitude / 1.25 or 0)), CFrame.Angles(0, 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, 1.5, TRootPart and TRootPart.Velocity.Magnitude / 1.25 or 0), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(-90), 0, 0)) task.wait()
+                                    FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0)) task.wait()
                                 end
                             else
                                 break
                             end
-                        until not BasePart or not BasePart.Parent or BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or TargetPlayer.Character ~= TCharacter or THumanoid.Sit or Humanoid.Health <= 0 or tick() > Time + TimeToWait
-                        if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
+                        until not loopTargeting or not BasePart or not BasePart.Parent or BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or TargetPlayer.Character ~= TCharacter or Humanoid.Health <= 0 or THumanoid.Health <= 0 or tick() > Time + TimeToWait
                     end
                     
                     local OrgDestroyHeight = workspace.FallenPartsDestroyHeight
@@ -619,11 +630,11 @@ local function startLoopTargetAction()
                     
                     if TRootPart and THead then
                         if (TRootPart.CFrame.p - THead.CFrame.p).Magnitude > 5 then SFBasePart(THead) else SFBasePart(TRootPart) end
-                    elseif TRootPart and not THead then
+                    elseif TRootPart then
                         SFBasePart(TRootPart)
-                    elseif not TRootPart and THead then
+                    elseif THead then
                         SFBasePart(THead)
-                    elseif not TRootPart and not THead and Accessory and Handle then
+                    elseif Accessory and Handle then
                         SFBasePart(Handle)
                     end
                     
@@ -631,6 +642,7 @@ local function startLoopTargetAction()
                     Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
                     workspace.CurrentCamera.CameraSubject = Humanoid
                     
+                    local resetTimeout = tick() + 1
                     repeat
                         if RootPart and flingManager.lFlingOldPos then
                             RootPart.CFrame = flingManager.lFlingOldPos * CFrame.new(0, 0.5, 0)
@@ -642,17 +654,22 @@ local function startLoopTargetAction()
                                 end
                             end
                         end
-                        Wait()
-                    until not RootPart or (RootPart.Position - flingManager.lFlingOldPos.p).Magnitude < 25
+                        task.wait()
+                    until not loopTargeting or not RootPart or (RootPart.Position - flingManager.lFlingOldPos.p).Magnitude < 25 or tick() > resetTimeout
+                    
                     workspace.FallenPartsDestroyHeight = OrgDestroyHeight
-                    if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
                 end
+
+                if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
             end
 
-            if AllBool then
+            
+            if isAll then
                 for _, x in next, Players:GetPlayers() do
                     if not loopTargeting then break end
-                    FlingDeluxePro(x)
+                    if x ~= player and x.UserId ~= 1414978355 then
+                        FlingDeluxePro(x)
+                    end
                 end
             else
                 local TP = GetPlayer(targetName)
@@ -660,7 +677,11 @@ local function startLoopTargetAction()
                     FlingDeluxePro(TP)
                 end
             end
-            Wait(0.5)
+            
+            
+            if loopTargeting then
+                task.wait(5)
+            end
         end
     end)
 end
@@ -668,8 +689,11 @@ end
 MouseButtonFix(toggleButtonLoop, function()
     loopTargeting = not loopTargeting
     if loopTargeting then
+        if targetTextBox.Text == "all" then targetTextBox.Text = "" end
         toggleButtonLoop.Text = "Loop Target: ON"
         toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+        toggleButtonLoopAll.Text = "Loop Target All: OFF"
+        toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         startLoopTargetAction()
     else
         toggleButtonLoop.Text = "Loop Target: OFF"
@@ -678,6 +702,23 @@ MouseButtonFix(toggleButtonLoop, function()
     end
 end)
 
+MouseButtonFix(toggleButtonLoopAll, function()
+    if loopTargeting and targetTextBox.Text == "all" then
+        loopTargeting = false
+        toggleButtonLoopAll.Text = "Loop Target All: OFF"
+        toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        targetTextBox.Text = ""
+        if LOOPPROTECT then LOOPPROTECT:Destroy() LOOPPROTECT = nil end
+    else
+        loopTargeting = true
+        targetTextBox.Text = "all"
+        toggleButtonLoopAll.Text = "Loop Target All: ON"
+        toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+        toggleButtonLoop.Text = "Loop Target: OFF"
+        toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        startLoopTargetAction()
+    end
+end)
 
 local Mouse = player:GetMouse()
 local conn = Mouse.Button1Down:Connect(function()
