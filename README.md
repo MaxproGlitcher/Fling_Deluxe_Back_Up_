@@ -13,3 +13,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MaxproGlitcher/Fling_
 
 
 ![image atl](https://github.com/MaxproGlitcher/Fling_Deluxe_Back_Up_/blob/f5577b6c4f3e14a64d3ff4d6aab12de22de74069/Fling_Deluxe_Picture.png)
+
+
+
+![image atl](https://github.com/MaxproGlitcher/Fling_Deluxe_Back_Up_/blob/2f8b59e0a41fd997d00742b3f2d7d4939aa4701d/Fling%20Deluxe%20Logo.jpg)
