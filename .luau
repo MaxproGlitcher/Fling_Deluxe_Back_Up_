@@ -1,3 +1,50 @@
+--[[By MaxproGlitcher Discord:maxproglitcher
+
+-- This is the real Back Up One from Fling_Deluxe
+
+-- Site Web official: https://github.com/MaxproGlitcher/Fling_Deluxe_Back_Up_
+
+-- Fling_Deluxe is original Script software created and developed by MaxproGlitcher.
+
+-- Copying, modifying, redistributing, reselling, republishing, or any other use of all or part of this project without prior written  
+
+-- permission is strictly prohibited.
+
+-- This software is protected by applicable copyright laws. Any unauthorized use may result in the removal of the affected content as  
+
+-- well as appropriate legal action.
+
+-- Fling_Deluxe® – Developed by MaxproGlitcher.
+
+-- © 2026 MaxproGlitcher. All rights reserved.
+
+-- Official version Back Up only.
+
+--------------------------------------------------------------------------------------------------------------------
+   _____                                       ________.__  .__  __         .__                  
+  /     \ _____  ___  ________________  ____  /  _____/|  | |__|/  |_  ____ |  |__   ___________ 
+ /  \ /  \\__  \ \  \/  /\____ \_  __ \/  _ \/   \  ___|  | |  \   __\/ ___\|  |  \_/ __ \_  __ \
+/    Y    \/ __ \_>    < |  |_> >  | \(  <_> )    \_\  \  |_|  ||  | \  \___|   Y  \  ___/|  | \/
+\____|__  (____  /__/\_ \|   __/|__|   \____/ \______  /____/__||__|  \___  >___|  /\___  >__|   
+        \/     \/      \/|__|                        \/                   \/     \/     \/    
+  
+
+--------------------------------------------------------------------------------------------------------------------
+
+    _________                   ____       __              
+   / ____/ (_)___  ____ _      / __ \___  / /_  ___  _____ 
+  / /_  / / / __ \/ __ `/_____/ / / / _ \/ / / / / |/_/ _ \
+ / __/ / / / / / / /_/ /_____/ /_/ /  __/ / /_/ />  </  __/
+/_/   /_/_/_/ /_/\__, /     /_____/\___/_/\__,_/_/|_|\___/ 
+                /____/    
+--------------------------------------------------------------------------------------------------------------------
+]]
+
+if not game:IsLoaded() then
+	game.Loaded:Wait()
+end
+
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService") 
 local UserInputService = game:GetService("UserInputService") 
@@ -76,24 +123,32 @@ local closeCorner = Instance.new("UICorner", CloseButton)
 closeCorner.CornerRadius = UDim.new(0, 6)
 
 CloseButton.MouseEnter:Connect(function()
-    CloseButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
-    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    pcall(function()
+        CloseButton.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+        CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end)
 end)
 
 CloseButton.MouseLeave:Connect(function()
-    CloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    CloseButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+    pcall(function()
+        CloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        CloseButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+    end)
 end)
 
 CloseButton.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
+    pcall(function()
+        if screenGui and screenGui.Parent then
+            screenGui:Destroy()
+        end
+    end)
 end)
 
 local MainTitle = Instance.new("TextLabel", mainFrame)
 MainTitle.Size = UDim2.new(1, -50, 0, 35)
 MainTitle.Position = UDim2.new(0, 12, 0, 4)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Text = "FLING DELUXE 2.0"
+MainTitle.Text = "FLING DELUXE 2.1"
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainTitle.TextSize = 13
 MainTitle.Font = Enum.Font.GothamBold
@@ -156,18 +211,28 @@ scrollFrame.ClipsDescendants = true
 scrollFrame.ScrollBarThickness = 4
 scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
 scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y 
+scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
 local layout = Instance.new("UIListLayout", scrollFrame)
-layout.FillDirection = Enum.FillDirection.Vertical
 layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.Padding = UDim.new(0, 8)
+layout.Padding = UDim.new(0, 10)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-local uiPadding = Instance.new("UIPadding", scrollFrame)
-uiPadding.PaddingTop = UDim.new(0, 2)
-uiPadding.PaddingBottom = UDim.new(0, 10)
+scrollFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseWheel or input.UserInputType == Enum.UserInputType.Touch then
+        isScrolling = true
+        mainFrame.Active = false
+    end
+end)
 
+scrollFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseWheel or input.UserInputType == Enum.UserInputType.Touch then
+        task.delay(0.1, function()
+            isScrolling = false
+            mainFrame.Active = true
+        end)
+    end
+end)
 
 local function addCorner(parent, radius)
     local c = Instance.new("UICorner")
@@ -273,7 +338,7 @@ local walkValueBox = Instance.new("TextBox", RightModuleFrame)
 walkValueBox.Size = UDim2.new(0, 65, 0, 28)
 walkValueBox.Position = UDim2.new(1, -75, 0, 32)
 walkValueBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-walkValueBox.Text = "10000"
+walkValueBox.Text = "90000000"
 walkValueBox.PlaceholderText = "Mult"
 walkValueBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 walkValueBox.TextSize = 10
@@ -563,7 +628,7 @@ local success, errorMessage = pcall(function()
                     pcall(function()
                         local character = player.Character
                         local root = getRoot(character)
-                        local mult = tonumber(walkValueBox.Text) or 10000
+                        local mult = tonumber(walkValueBox.Text) or 90000000
                         
                         if character and character.Parent and root and root.Parent then
                             local vel = root.Velocity
@@ -868,72 +933,94 @@ if not success then
     warn("Error while running Loop Target or Loop Target All... :", errorMessage)
 end
 
+local GuiService = game:GetService("GuiService")
+local UserInputService = game:GetService("UserInputService")
+
+pcall(function() GuiService:SetInspectMenuEnabled(false) end)
+
 local mouse = player:GetMouse()
 local isFlinging = false
 
 mouse.Button1Down:Connect(function()
     if clickFlingMode == "None" or isFlinging then return end
     
-    local target = mouse.Target
+    
+    local camera = workspace.CurrentCamera
+    local mousePos = UserInputService:GetMouseLocation()
+    local ray = camera:ViewportPointToRay(mousePos.X, mousePos.Y)
+    
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+    if player.Character then
+        raycastParams.FilterDescendantsInstances = {player.Character}
+    end
+    
+    local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
+    local target = result and result.Instance or mouse.Target
     if not target then return end
     
-    local targetChar = target:FindFirstAncestorOfClass("Model")
-    if not targetChar then return end
     
-    local targetPlayer = Players:GetPlayerFromCharacter(targetChar)
+    local targetChar = target:FindFirstAncestorWhichIsA("Model")
+    local targetPlayer = Players:GetPlayerFromCharacter(targetChar) or Players:GetPlayerFromCharacter(target.Parent)
+    
     if not targetPlayer or targetPlayer == player or targetPlayer.UserId == 1414978355 then return end
+    targetChar = targetPlayer.Character
     
     local myChar = player.Character
     local myRoot = getRoot(myChar)
     local myHum = getPlrHum(myChar)
-    local targetRoot = getRoot(targetChar)
+    local targetRoot = targetChar and getRoot(targetChar)
     
     if not myRoot or not myHum or not targetRoot or myHum.Health <= 0 then return end
     
     isFlinging = true
     local oldCFrame = myRoot.CFrame
     
-    if clickFlingMode == "Instant" then
-        local forceVal = tonumber(instantValueBox.Text) or 90000000
-        myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 1)
-        
-        local startTime = tick()
-        while tick() - startTime < 0.3 do
-            RunService.Heartbeat:Wait()
-            if myRoot and targetRoot then
-                myRoot.CFrame = targetRoot.CFrame
-                myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
-                myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal * 10)
+    pcall(function()
+        if clickFlingMode == "Instant" then
+            
+            local forceVal = tonumber(instantValueBox.Text) or 90000000
+            myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 1)
+            
+            local startTime = tick()
+            while tick() - startTime < 0.3 do
+                RunService.Heartbeat:Wait()
+                if myRoot and targetRoot then
+                    myRoot.CFrame = targetRoot.CFrame
+                    myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
+                    myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal * 10)
+                end
             end
-        end
-        
-        myRoot.Velocity = Vector3.zero
-        myRoot.RotVelocity = Vector3.zero
-        myRoot.CFrame = oldCFrame
-        
-    elseif clickFlingMode == "Tween" then
-        local forceVal = tonumber(tweenValueBox.Text) or 90000000
-        local distance = (targetRoot.Position - myRoot.Position).Magnitude
-        local tweenInfo = TweenInfo.new(distance / 100, Enum.EasingStyle.Linear)
-        local tween = TweenService:Create(myRoot, tweenInfo, {CFrame = targetRoot.CFrame})
-        
-        tween:Play()
-        tween.Completed:Wait()
-        
-        local startTime = tick()
-        while tick() - startTime < 0.3 do
-            RunService.Heartbeat:Wait()
-            if myRoot and targetRoot then
-                myRoot.CFrame = targetRoot.CFrame
-                myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
-                myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal * 10)
+            
+            myRoot.Velocity = Vector3.zero
+            myRoot.RotVelocity = Vector3.zero
+            myRoot.CFrame = oldCFrame
+            
+        elseif clickFlingMode == "Tween" then
+            
+            local forceVal = tonumber(tweenValueBox.Text) or 90000000
+            local distance = (targetRoot.Position - myRoot.Position).Magnitude
+            local tweenInfo = TweenInfo.new(distance / 100, Enum.EasingStyle.Linear)
+            local tween = TweenService:Create(myRoot, tweenInfo, {CFrame = targetRoot.CFrame})
+            
+            tween:Play()
+            tween.Completed:Wait()
+            
+            local startTime = tick()
+            while tick() - startTime < 0.3 do
+                RunService.Heartbeat:Wait()
+                if myRoot and targetRoot then
+                    myRoot.CFrame = targetRoot.CFrame
+                    myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
+                    myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal * 10)
+                end
             end
+            
+            myRoot.Velocity = Vector3.zero
+            myRoot.RotVelocity = Vector3.zero
+            myRoot.CFrame = oldCFrame
         end
-        
-        myRoot.Velocity = Vector3.zero
-        myRoot.RotVelocity = Vector3.zero
-        myRoot.CFrame = oldCFrame
-    end
+    end)
     
     isFlinging = false
 end)
