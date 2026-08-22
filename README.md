@@ -30,7 +30,7 @@ Always verify that you are using the official GitHub repository before downloadi
 
 Thank you to everyone who supported the original project. This new version continues the project with a safer and more secure future.
 
-Official Repository: `https://github.com/MaxproGlitcher/Fling_Deluxe_Back_Up_`
+Official Repository: https://github.com/MaxproGlitcher/Fling\_Deluxe\_Back\_Up\_`
 
 ## Features & Engineering
 
