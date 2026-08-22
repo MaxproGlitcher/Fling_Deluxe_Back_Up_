@@ -54,8 +54,6 @@ Fling Deluxe Back Up is designed to support different environments, including:
 * iOS
 * Mac
 
-![image atl](https://github.com/MaxproGlitcher/Fling_Deluxe_Back_Up_/blob/a936e7839fa8db323dad9d9ce5c85b9e1df36dd0/Fling%20Deluxe%20Logo.png)
-
 ## Privacy Commitment
 
 Fling Deluxe Back Up does not collect any personal information.
