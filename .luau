@@ -28,9 +28,7 @@
 \____|__  (____  /__/\_ \|   __/|__|   \____/ \______  /____/__||__|  \___  >___|  /\___  >__|   
         \/     \/      \/|__|                        \/                   \/     \/     \/    
   
-
 --------------------------------------------------------------------------------------------------------------------
-
     _________                   ____       __              
    / ____/ (_)___  ____ _      / __ \___  / /_  ___  _____ 
   / /_  / / / __ \/ __ `/_____/ / / / _ \/ / / / / |/_/ _ \
@@ -449,76 +447,89 @@ local success, errorMessage = pcall(function()
     targetTextBox:GetPropertyChangedSignal("AbsolutePosition"):Connect(updateSearchPosition)
 
     local function updateSearchList()
+    
+    pcall(function()
+        for _, item in ipairs(searchScroll:GetChildren()) do
+            if item:IsA("TextButton") then 
+                item:Destroy() 
+            end
+        end
+    end)
+    
+    local text = targetTextBox.Text:lower():gsub("%s+", "")
+    local matches = {}
+
+    table.insert(matches, { textToShow = "None", targetValue = "None" })
+
+    
+    pcall(function()
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= player then
+                local username = p.Name
+                local displayName = p.DisplayName
+                
+                local nameClean = username:lower():gsub("%s+", "")
+                local dnameClean = displayName:lower():gsub("%s+", "")
+                
+                if text == "" or nameClean:find(text, 1, true) or dnameClean:find(text, 1, true) then
+                    table.insert(matches, {
+                        textToShow = username .. " (" .. displayName .. ")",
+                        targetValue = username
+                    })
+                end
+            end
+        end
+    end)
+    
+
+    for _, itemData in ipairs(matches) do
         pcall(function()
-            for _, item in ipairs(searchScroll:GetChildren()) do
-                if item:IsA("TextButton") then 
-                    pcall(function() item:Destroy() end) 
-                end
-            end
+            local btn = Instance.new("TextButton", searchScroll)
+            btn.Size = UDim2.new(1, 0, 0, 24)
+            btn.BackgroundTransparency = 1
+            btn.Text = "  " .. itemData.textToShow
+            btn.TextColor3 = (itemData.targetValue == "None") and Color3.fromRGB(200, 70, 70) or Color3.fromRGB(220, 220, 220)
+            btn.TextXAlignment = Enum.TextXAlignment.Left
+            btn.TextSize = 10
+            btn.Font = Enum.Font.GothamMedium
+            btn.ZIndex = 11
             
-            local text = targetTextBox.Text:lower():gsub("%s+", "")
-            local matches = {}
-
-            table.insert(matches, "None")
-
-            for _, p in ipairs(Players:GetPlayers()) do
-                if p ~= player then
-                    local name = p.Name:lower():gsub("%s+", "")
-                    local dname = p.DisplayName:lower():gsub("%s+", "")
-                    if text == "" or name:find(text, 1, true) or dname:find(text, 1, true) then
-                        table.insert(matches, p.Name)
-                    end
-                end
-            end
+            btn.MouseEnter:Connect(function()
+                pcall(function()
+                    btn.BackgroundTransparency = 0.9
+                    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                end)
+            end)
             
-            for _, name in ipairs(matches) do
-                local btn = Instance.new("TextButton", searchScroll)
-                btn.Size = UDim2.new(1, 0, 0, 24)
-                btn.BackgroundTransparency = 1
-                btn.Text = "  " .. name
-                btn.TextColor3 = name == "None" and Color3.fromRGB(200, 70, 70) or Color3.fromRGB(220, 220, 220)
-                btn.TextXAlignment = Enum.TextXAlignment.Left
-                btn.TextSize = 10
-                btn.Font = Enum.Font.GothamMedium
-                btn.ZIndex = 11
-                
-                btn.MouseEnter:Connect(function()
-                    pcall(function()
-                        btn.BackgroundTransparency = 0.9
-                        btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                    end)
+            btn.MouseLeave:Connect(function()
+                pcall(function()
+                    btn.BackgroundTransparency = 1
                 end)
-                btn.MouseLeave:Connect(function()
-                    pcall(function()
-                        btn.BackgroundTransparency = 1
-                    end)
-                end)
-                
-                btn.MouseButton1Click:Connect(function()
-                    pcall(function()
-                        if name == "None" then
-                            targetTextBox.Text = ""
-                            if loopTargeting then
-                                loopTargeting = false
+            end)
+            
+            btn.MouseButton1Click:Connect(function()
+                pcall(function()
+                    if itemData.targetValue == "None" then
+                        targetTextBox.Text = ""
+                        if loopTargeting then
+                            loopTargeting = false
+                            if toggleButtonLoop then
                                 toggleButtonLoop.Text = "Loop Target: OFF"
                                 toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                                if LOOPPROTECT then 
-                                    pcall(function() LOOPPROTECT:Destroy() end) 
-                                    LOOPPROTECT = nil 
-                                end
                             end
-                        else
-                            targetTextBox.Text = name
+                            if currentThread then task.cancel(currentThread) end
                         end
+                    else
+                        targetTextBox.Text = itemData.targetValue
+                    end
 
-                        searchScroll.Visible = false
-                        targetTextBox:ReleaseFocus()
-                        updateSearchList()
-                    end)
+                    searchScroll.Visible = false
+                    targetTextBox:ReleaseFocus()
                 end)
-            end
+            end)
         end)
     end
+end
 
     targetTextBox:GetPropertyChangedSignal("Text"):Connect(function()
         updateSearchList()
