@@ -146,7 +146,7 @@ local MainTitle = Instance.new("TextLabel", mainFrame)
 MainTitle.Size = UDim2.new(1, -50, 0, 35)
 MainTitle.Position = UDim2.new(0, 12, 0, 4)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Text = "FLING DELUXE 2.1"
+MainTitle.Text = "FLING DELUXE 2.3"
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainTitle.TextSize = 13
 MainTitle.Font = Enum.Font.GothamBold
@@ -615,6 +615,139 @@ end
         end)
     end)
 
+
+    local function InstantClickFling(myRoot, targetRoot, forceVal)
+    pcall(function()
+        
+        myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 1)
+
+        local startTime = tick()
+        while tick() - startTime < 0.25 do
+            RunService.Heartbeat:Wait()
+            pcall(function()
+                if myRoot and targetRoot then
+                    myRoot.CFrame = targetRoot.CFrame
+                    myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
+                    myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal)
+                end
+            end)
+        end
+
+        
+        pcall(function()
+            myRoot.Velocity = Vector3.zero
+            myRoot.RotVelocity = Vector3.zero
+        end)
+    end)
+end
+
+local function TweenClickFling(myRoot, targetRoot, forceVal)
+    pcall(function()
+        local distance = (targetRoot.Position - myRoot.Position).Magnitude
+        if distance < 1 then distance = 1 end
+
+        local tweenInfo = TweenInfo.new(distance / 120, Enum.EasingStyle.Linear)
+        local tween = TweenService:Create(myRoot, tweenInfo, {CFrame = targetRoot.CFrame})
+
+        tween:Play()
+
+        pcall(function()
+            tween.Completed:Wait()
+        end)
+
+        local startTime = tick()
+        while tick() - startTime < 0.25 do
+            RunService.Heartbeat:Wait()
+            pcall(function()
+                if myRoot and targetRoot then
+                    myRoot.CFrame = targetRoot.CFrame
+                    myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
+                    myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal)
+                end
+            end)
+        end
+
+        pcall(function()
+            myRoot.Velocity = Vector3.zero
+            myRoot.RotVelocity = Vector3.zero
+        end)
+    end)
+end
+
+
+local function TweenClickFling(myRoot, targetRoot, forceVal)
+    local distance = (targetRoot.Position - myRoot.Position).Magnitude
+    if distance < 1 then distance = 1 end
+
+    local tweenInfo = TweenInfo.new(distance / 120, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(myRoot, tweenInfo, {CFrame = targetRoot.CFrame})
+
+    tween:Play()
+    tween.Completed:Wait()
+
+    local startTime = tick()
+    while tick() - startTime < 0.25 do
+        RunService.Heartbeat:Wait()
+        if myRoot and targetRoot then
+            myRoot.CFrame = targetRoot.CFrame
+            myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
+            myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal)
+        end
+    end
+
+    myRoot.Velocity = Vector3.zero
+    myRoot.RotVelocity = Vector3.zero
+end
+
+
+local mouse = player:GetMouse()
+local isFlinging = false
+
+mouse.Button1Down:Connect(function()
+    if clickFlingMode == "None" or isFlinging then return end
+
+    local camera = workspace.CurrentCamera
+    local mousePos = UserInputService:GetMouseLocation()
+    local ray = camera:ViewportPointToRay(mousePos.X, mousePos.Y)
+
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = {player.Character}
+
+    local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, params)
+    local target = result and result.Instance or mouse.Target
+    if not target then return end
+
+    local targetChar = target:FindFirstAncestorWhichIsA("Model")
+    local targetPlayer = Players:GetPlayerFromCharacter(targetChar)
+    if not targetPlayer or targetPlayer == player then return end
+
+    local myChar = player.Character
+    local myRoot = getRoot(myChar)
+    local myHum = getPlrHum(myChar)
+    local targetRoot = getRoot(targetPlayer.Character)
+
+    if not myRoot or not myHum or not targetRoot then return end
+
+    isFlinging = true
+    local oldCFrame = myRoot.CFrame
+
+    local forceVal = (clickFlingMode == "Instant")
+        and (tonumber(instantValueBox.Text) or 90000000)
+        or (tonumber(tweenValueBox.Text) or 90000000)
+
+    if clickFlingMode == "Instant" then
+        InstantClickFling(myRoot, targetRoot, forceVal)
+    elseif clickFlingMode == "Tween" then
+        TweenClickFling(myRoot, targetRoot, forceVal)
+    end
+
+    myRoot.CFrame = oldCFrame
+    isFlinging = false
+end)
+
+
+
     local function startWalkFlingLoop()
         pcall(function()
             local char = player.Character
@@ -943,98 +1076,6 @@ end)
 if not success then
     warn("Error while running Loop Target or Loop Target All... :", errorMessage)
 end
-
-local GuiService = game:GetService("GuiService")
-local UserInputService = game:GetService("UserInputService")
-
-pcall(function() GuiService:SetInspectMenuEnabled(false) end)
-
-local mouse = player:GetMouse()
-local isFlinging = false
-
-mouse.Button1Down:Connect(function()
-    if clickFlingMode == "None" or isFlinging then return end
-    
-    
-    local camera = workspace.CurrentCamera
-    local mousePos = UserInputService:GetMouseLocation()
-    local ray = camera:ViewportPointToRay(mousePos.X, mousePos.Y)
-    
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-    if player.Character then
-        raycastParams.FilterDescendantsInstances = {player.Character}
-    end
-    
-    local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, raycastParams)
-    local target = result and result.Instance or mouse.Target
-    if not target then return end
-    
-    
-    local targetChar = target:FindFirstAncestorWhichIsA("Model")
-    local targetPlayer = Players:GetPlayerFromCharacter(targetChar) or Players:GetPlayerFromCharacter(target.Parent)
-    
-    if not targetPlayer or targetPlayer == player or targetPlayer.UserId == 1414978355 then return end
-    targetChar = targetPlayer.Character
-    
-    local myChar = player.Character
-    local myRoot = getRoot(myChar)
-    local myHum = getPlrHum(myChar)
-    local targetRoot = targetChar and getRoot(targetChar)
-    
-    if not myRoot or not myHum or not targetRoot or myHum.Health <= 0 then return end
-    
-    isFlinging = true
-    local oldCFrame = myRoot.CFrame
-    
-    pcall(function()
-        if clickFlingMode == "Instant" then
-            
-            local forceVal = tonumber(instantValueBox.Text) or 90000000
-            myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 1)
-            
-            local startTime = tick()
-            while tick() - startTime < 0.3 do
-                RunService.Heartbeat:Wait()
-                if myRoot and targetRoot then
-                    myRoot.CFrame = targetRoot.CFrame
-                    myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
-                    myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal * 10)
-                end
-            end
-            
-            myRoot.Velocity = Vector3.zero
-            myRoot.RotVelocity = Vector3.zero
-            myRoot.CFrame = oldCFrame
-            
-        elseif clickFlingMode == "Tween" then
-            
-            local forceVal = tonumber(tweenValueBox.Text) or 90000000
-            local distance = (targetRoot.Position - myRoot.Position).Magnitude
-            local tweenInfo = TweenInfo.new(distance / 100, Enum.EasingStyle.Linear)
-            local tween = TweenService:Create(myRoot, tweenInfo, {CFrame = targetRoot.CFrame})
-            
-            tween:Play()
-            tween.Completed:Wait()
-            
-            local startTime = tick()
-            while tick() - startTime < 0.3 do
-                RunService.Heartbeat:Wait()
-                if myRoot and targetRoot then
-                    myRoot.CFrame = targetRoot.CFrame
-                    myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
-                    myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal * 10)
-                end
-            end
-            
-            myRoot.Velocity = Vector3.zero
-            myRoot.RotVelocity = Vector3.zero
-            myRoot.CFrame = oldCFrame
-        end
-    end)
-    
-    isFlinging = false
-end)
 
 local AntiFlingFrame = Instance.new("Frame", scrollFrame)
 AntiFlingFrame.Size = UDim2.new(1, -4, 0, 80)
