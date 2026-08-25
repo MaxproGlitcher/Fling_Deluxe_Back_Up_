@@ -146,7 +146,7 @@ local MainTitle = Instance.new("TextLabel", mainFrame)
 MainTitle.Size = UDim2.new(1, -50, 0, 35)
 MainTitle.Position = UDim2.new(0, 12, 0, 4)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Text = "FLING DELUXE 2.3"
+MainTitle.Text = "FLING DELUXE 2.4"
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainTitle.TextSize = 13
 MainTitle.Font = Enum.Font.GothamBold
@@ -579,65 +579,74 @@ end
         end
     end)
 
-    local clickFlingMode = "Instant" 
+  local clickFlingMode = "Instant" 
 
-    MouseButtonFix(toggleButtonInstant, function()
-        pcall(function()
-            if clickFlingMode == "Instant" then
-                clickFlingMode = "None"
-                toggleButtonInstant.Text = "Instant Click Fling: OFF"
-                toggleButtonInstant.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            else
-                clickFlingMode = "Instant"
-                toggleButtonInstant.Text = "Instant Click Fling: ON"
-                toggleButtonInstant.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
-                
-                toggleButtonTween.Text = "Tween Click Fling: OFF"
-                toggleButtonTween.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            end
-        end)
-    end)
-
-    MouseButtonFix(toggleButtonTween, function()
-        pcall(function()
-            if clickFlingMode == "Tween" then
-                clickFlingMode = "None"
-                toggleButtonTween.Text = "Tween Click Fling: OFF"
-                toggleButtonTween.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            else
-                clickFlingMode = "Tween"
-                toggleButtonTween.Text = "Tween Click Fling: ON"
-                toggleButtonTween.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
-                
-                toggleButtonInstant.Text = "Instant Click Fling: OFF"
-                toggleButtonInstant.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            end
-        end)
-    end)
-
-
-    local function InstantClickFling(myRoot, targetRoot, forceVal)
+MouseButtonFix(toggleButtonInstant, function()
     pcall(function()
-        
-        myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 1)
-
-        local startTime = tick()
-        while tick() - startTime < 0.25 do
-            RunService.Heartbeat:Wait()
-            pcall(function()
-                if myRoot and targetRoot then
-                    myRoot.CFrame = targetRoot.CFrame
-                    myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
-                    myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal)
-                end
-            end)
+        if clickFlingMode == "Instant" then
+            clickFlingMode = "None"
+            toggleButtonInstant.Text = "Instant Click Fling: OFF"
+            toggleButtonInstant.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        else
+            clickFlingMode = "Instant"
+            toggleButtonInstant.Text = "Instant Click Fling: ON"
+            toggleButtonInstant.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+            
+            toggleButtonTween.Text = "Tween Click Fling: OFF"
+            toggleButtonTween.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         end
+    end)
+end)
 
-        
+MouseButtonFix(toggleButtonTween, function()
+    pcall(function()
+        if clickFlingMode == "Tween" then
+            clickFlingMode = "None"
+            toggleButtonTween.Text = "Tween Click Fling: OFF"
+            toggleButtonTween.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        else
+            clickFlingMode = "Tween"
+            toggleButtonTween.Text = "Tween Click Fling: ON"
+            toggleButtonTween.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+            
+            toggleButtonInstant.Text = "Instant Click Fling: OFF"
+            toggleButtonInstant.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end
+    end)
+end)
+
+local function ApplyFlingForces(myRoot, targetRoot, forceVal)
+    
+    local character = myRoot.Parent
+    for _, part in ipairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+        end
+    end
+
+    local startTime = tick()
+    while tick() - startTime < 0.25 do
+        RunService.Heartbeat:Wait()
         pcall(function()
-            myRoot.Velocity = Vector3.zero
-            myRoot.RotVelocity = Vector3.zero
+            if myRoot and targetRoot then
+                myRoot.CFrame = targetRoot.CFrame
+                myRoot.AssemblyLinearVelocity = Vector3.new(forceVal, forceVal * 10, forceVal)
+                myRoot.AssemblyAngularVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal)
+            end
         end)
+    end
+
+    
+    pcall(function()
+        myRoot.AssemblyLinearVelocity = Vector3.zero
+        myRoot.AssemblyAngularVelocity = Vector3.zero
+    end)
+end
+
+local function InstantClickFling(myRoot, targetRoot, forceVal)
+    pcall(function()
+        myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 1)
+        ApplyFlingForces(myRoot, targetRoot, forceVal)
     end)
 end
 
@@ -650,53 +659,10 @@ local function TweenClickFling(myRoot, targetRoot, forceVal)
         local tween = TweenService:Create(myRoot, tweenInfo, {CFrame = targetRoot.CFrame})
 
         tween:Play()
+        tween.Completed:Wait()
 
-        pcall(function()
-            tween.Completed:Wait()
-        end)
-
-        local startTime = tick()
-        while tick() - startTime < 0.25 do
-            RunService.Heartbeat:Wait()
-            pcall(function()
-                if myRoot and targetRoot then
-                    myRoot.CFrame = targetRoot.CFrame
-                    myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
-                    myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal)
-                end
-            end)
-        end
-
-        pcall(function()
-            myRoot.Velocity = Vector3.zero
-            myRoot.RotVelocity = Vector3.zero
-        end)
+        ApplyFlingForces(myRoot, targetRoot, forceVal)
     end)
-end
-
-
-local function TweenClickFling(myRoot, targetRoot, forceVal)
-    local distance = (targetRoot.Position - myRoot.Position).Magnitude
-    if distance < 1 then distance = 1 end
-
-    local tweenInfo = TweenInfo.new(distance / 120, Enum.EasingStyle.Linear)
-    local tween = TweenService:Create(myRoot, tweenInfo, {CFrame = targetRoot.CFrame})
-
-    tween:Play()
-    tween.Completed:Wait()
-
-    local startTime = tick()
-    while tick() - startTime < 0.25 do
-        RunService.Heartbeat:Wait()
-        if myRoot and targetRoot then
-            myRoot.CFrame = targetRoot.CFrame
-            myRoot.Velocity = Vector3.new(forceVal, forceVal * 10, forceVal)
-            myRoot.RotVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal)
-        end
-    end
-
-    myRoot.Velocity = Vector3.zero
-    myRoot.RotVelocity = Vector3.zero
 end
 
 
@@ -730,7 +696,7 @@ mouse.Button1Down:Connect(function()
     if not myRoot or not myHum or not targetRoot then return end
 
     isFlinging = true
-    local oldCFrame = myRoot.CFrame
+    local oldCFrame = myRoot.CFrame 
 
     local forceVal = (clickFlingMode == "Instant")
         and (tonumber(instantValueBox.Text) or 90000000)
@@ -742,7 +708,18 @@ mouse.Button1Down:Connect(function()
         TweenClickFling(myRoot, targetRoot, forceVal)
     end
 
+  
     myRoot.CFrame = oldCFrame
+    myRoot.AssemblyLinearVelocity = Vector3.zero
+    myRoot.AssemblyAngularVelocity = Vector3.zero
+    
+    
+    for _, part in ipairs(myChar:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
+        end
+    end
+
     isFlinging = false
 end)
 
