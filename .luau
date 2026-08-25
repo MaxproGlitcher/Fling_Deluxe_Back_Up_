@@ -146,7 +146,7 @@ local MainTitle = Instance.new("TextLabel", mainFrame)
 MainTitle.Size = UDim2.new(1, -50, 0, 35)
 MainTitle.Position = UDim2.new(0, 12, 0, 4)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Text = "FLING DELUXE 2.4"
+MainTitle.Text = "FLING DELUXE 2.5"
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainTitle.TextSize = 13
 MainTitle.Font = Enum.Font.GothamBold
@@ -256,7 +256,6 @@ LeftTitle.TextSize = 11
 LeftTitle.Font = Enum.Font.GothamBold
 LeftTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-
 local toggleButtonInstant = InstanceNew("TextButton", LeftModuleFrame)
 toggleButtonInstant.Size = UDim2.new(1, -90, 0, 28) 
 toggleButtonInstant.Position = UDim2.new(0, 10, 0, 30)
@@ -280,7 +279,6 @@ instantValueBox.Font = Enum.Font.GothamMedium
 instantValueBox.BorderSizePixel = 0
 addCorner(instantValueBox, 6)
 
-
 local toggleButtonTween = InstanceNew("TextButton", LeftModuleFrame)
 toggleButtonTween.Size = UDim2.new(1, -90, 0, 28) 
 toggleButtonTween.Position = UDim2.new(0, 10, 0, 66)
@@ -303,7 +301,6 @@ tweenValueBox.TextSize = 10
 tweenValueBox.Font = Enum.Font.GothamMedium
 tweenValueBox.BorderSizePixel = 0
 addCorner(tweenValueBox, 6)
-
 
 local RightModuleFrame = Instance.new("Frame", scrollFrame)
 RightModuleFrame.Size = UDim2.new(1, -4, 0, 75) 
@@ -343,7 +340,6 @@ walkValueBox.TextSize = 10
 walkValueBox.Font = Enum.Font.GothamMedium
 walkValueBox.BorderSizePixel = 0
 addCorner(walkValueBox, 6)
-
 
 local TargetModuleFrame = Instance.new("Frame", scrollFrame)
 TargetModuleFrame.Size = UDim2.new(1, -4, 0, 145) 
@@ -420,7 +416,6 @@ loopAllValueBox.TextSize = 10
 loopAllValueBox.Font = Enum.Font.GothamMedium
 loopAllValueBox.BorderSizePixel = 0
 addCorner(loopAllValueBox, 6)
-
 
 local searchScroll = Instance.new("ScrollingFrame", screenGui)
 searchScroll.Size = UDim2.new(0, 310, 0, 120)
@@ -579,10 +574,11 @@ end
         end
     end)
 
-  local clickFlingMode = "Instant" 
+  
+    local clickFlingMode = "Instant" 
 
 MouseButtonFix(toggleButtonInstant, function()
-    pcall(function()
+    local success, err = pcall(function()
         if clickFlingMode == "Instant" then
             clickFlingMode = "None"
             toggleButtonInstant.Text = "Instant Click Fling: OFF"
@@ -596,10 +592,11 @@ MouseButtonFix(toggleButtonInstant, function()
             toggleButtonTween.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         end
     end)
+    if not success then warn("[Instant Button Error]: " .. tostring(err)) end
 end)
 
 MouseButtonFix(toggleButtonTween, function()
-    pcall(function()
+    local success, err = pcall(function()
         if clickFlingMode == "Tween" then
             clickFlingMode = "None"
             toggleButtonTween.Text = "Tween Click Fling: OFF"
@@ -613,10 +610,10 @@ MouseButtonFix(toggleButtonTween, function()
             toggleButtonInstant.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         end
     end)
+    if not success then warn("[Tween Button Error]: " .. tostring(err)) end
 end)
 
 local function ApplyFlingForces(myRoot, targetRoot, forceVal)
-    
     local character = myRoot.Parent
     for _, part in ipairs(character:GetDescendants()) do
         if part:IsA("BasePart") then
@@ -627,31 +624,33 @@ local function ApplyFlingForces(myRoot, targetRoot, forceVal)
     local startTime = tick()
     while tick() - startTime < 0.25 do
         RunService.Heartbeat:Wait()
-        pcall(function()
+        local success, err = pcall(function()
             if myRoot and targetRoot then
                 myRoot.CFrame = targetRoot.CFrame
                 myRoot.AssemblyLinearVelocity = Vector3.new(forceVal, forceVal * 10, forceVal)
                 myRoot.AssemblyAngularVelocity = Vector3.new(forceVal * 10, forceVal * 10, forceVal)
             end
         end)
+        if not success then warn("[Fling Loop Error]: " .. tostring(err)) end
     end
 
-    
-    pcall(function()
+    local success, err = pcall(function()
         myRoot.AssemblyLinearVelocity = Vector3.zero
         myRoot.AssemblyAngularVelocity = Vector3.zero
     end)
+    if not success then warn("[Reset Velocity Error]: " .. tostring(err)) end
 end
 
 local function InstantClickFling(myRoot, targetRoot, forceVal)
-    pcall(function()
+    local success, err = pcall(function()
         myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 1)
         ApplyFlingForces(myRoot, targetRoot, forceVal)
     end)
+    if not success then warn("[InstantClickFling Error]: " .. tostring(err)) end
 end
 
 local function TweenClickFling(myRoot, targetRoot, forceVal)
-    pcall(function()
+    local success, err = pcall(function()
         local distance = (targetRoot.Position - myRoot.Position).Magnitude
         if distance < 1 then distance = 1 end
 
@@ -663,8 +662,8 @@ local function TweenClickFling(myRoot, targetRoot, forceVal)
 
         ApplyFlingForces(myRoot, targetRoot, forceVal)
     end)
+    if not success then warn("[TweenClickFling Error]: " .. tostring(err)) end
 end
-
 
 local mouse = player:GetMouse()
 local isFlinging = false
@@ -708,7 +707,7 @@ mouse.Button1Down:Connect(function()
         TweenClickFling(myRoot, targetRoot, forceVal)
     end
 
-  
+    
     myRoot.CFrame = oldCFrame
     myRoot.AssemblyLinearVelocity = Vector3.zero
     myRoot.AssemblyAngularVelocity = Vector3.zero
@@ -716,14 +715,23 @@ mouse.Button1Down:Connect(function()
     
     for _, part in ipairs(myChar:GetDescendants()) do
         if part:IsA("BasePart") then
-            part.CanCollide = true
+            if part.Name == "HumanoidRootPart" then
+                part.CanCollide = false
+            else
+                part.CanCollide = true
+            end
         end
     end
 
+    
+    pcall(function()
+        myHum:ChangeState(Enum.HumanoidStateType.GettingUp)
+        task.wait()
+        myHum:ChangeState(Enum.HumanoidStateType.Running)
+    end)
+
     isFlinging = false
 end)
-
-
 
     local function startWalkFlingLoop()
         pcall(function()
