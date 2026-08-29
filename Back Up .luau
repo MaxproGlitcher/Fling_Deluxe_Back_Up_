@@ -1,4 +1,6 @@
- --[[By MaxproGlitcher Discord:maxproglitcher
+local success, err = xpcall(function()
+
+    --[[By MaxproGlitcher Discord:maxproglitcher
 
 -- This is the real Back Up One from Fling_Deluxe
 
@@ -38,9 +40,6 @@
 --------------------------------------------------------------------------------------------------------------------
 ]]
 
-local success, err = xpcall(function()
-
-
 if not game:IsLoaded() then
 	game.Loaded:Wait()
 end
@@ -67,7 +66,6 @@ local getRoot = function(char) return char and (char:FindFirstChild("HumanoidRoo
 local flingManager = flingManager or {}
 
 if clickflingUI then clickflingUI:Destroy() end
-local NAlib.disconnect("clickfling_mouse")
 local walkflinging = false 
 local loopTargeting = false 
 local tumbleMode = false
