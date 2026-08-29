@@ -1,4 +1,4 @@
---[[By MaxproGlitcher Discord:maxproglitcher
+  --[[By MaxproGlitcher Discord:maxproglitcher
 
 -- This is the real Back Up One from Fling_Deluxe
 
@@ -64,10 +64,10 @@ local getRoot = function(char) return char and (char:FindFirstChild("HumanoidRoo
 local flingManager = flingManager or {}
 
 if clickflingUI then clickflingUI:Destroy() end
-NAlib.disconnect("clickfling_mouse")
-walkflinging = false 
-loopTargeting = false 
-tumbleMode = false
+local walkflinging = false 
+local loopTargeting = false 
+local tumbleMode = false
+local loopTargetingAll = false
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ClickFlingModernGUI"
