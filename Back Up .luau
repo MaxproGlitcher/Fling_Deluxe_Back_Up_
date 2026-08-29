@@ -1,6 +1,4 @@
-local success, err = xpcall(function()
-
-    --[[By MaxproGlitcher Discord:maxproglitcher
+ --[[By MaxproGlitcher Discord:maxproglitcher
 
 -- This is the real Back Up One from Fling_Deluxe
 
@@ -39,6 +37,9 @@ local success, err = xpcall(function()
                 /____/    
 --------------------------------------------------------------------------------------------------------------------
 ]]
+
+local success, err = xpcall(function()
+
 
 if not game:IsLoaded() then
 	game.Loaded:Wait()
