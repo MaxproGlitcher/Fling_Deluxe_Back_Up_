@@ -1,4 +1,6 @@
---[[By MaxproGlitcher Discord:maxproglitcher
+local success, err = xpcall(function()
+
+    --[[By MaxproGlitcher Discord:maxproglitcher
 
 -- This is the real Back Up One from Fling_Deluxe
 
@@ -1121,3 +1123,17 @@ MouseButtonFix(AntiFlingButton, function()
         end
     end)
 end)
+
+
+
+    FlingDeluxePro(TargetPlayer, forceVal)
+
+end, function(err)
+    warn("ERREUR FlingDeluxe :", tostring(err))
+    warn(debug.traceback())
+    return err
+end)
+
+if not success then
+    warn("Fling_Deluxe a rencontré une erreur :", tostring(err))
+end
