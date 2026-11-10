@@ -1,4 +1,4 @@
-  --[[By MaxproGlitcher Discord:maxproglitcher
+--[[By MaxproGlitcher Discord:maxproglitcher
 
 -- This is the real Back Up One from Fling_Deluxe
 
@@ -42,7 +42,6 @@ if not game:IsLoaded() then
 	game.Loaded:Wait()
 end
 
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService") 
 local UserInputService = game:GetService("UserInputService") 
@@ -68,6 +67,7 @@ local walkflinging = false
 local loopTargeting = false 
 local tumbleMode = false
 local loopTargetingAll = false
+local selectedPlayers = {} -- [Player] = true
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ClickFlingModernGUI"
@@ -87,7 +87,6 @@ end)
 if not screenGui.Parent then
     screenGui.Parent = player:WaitForChild("PlayerGui")
 end
-
 
 local mainFrame = Instance.new("Frame", screenGui)
 mainFrame.Name = "Projet_Fling_Deluxe" .. tostring(math.random(100, 999)) 
@@ -146,7 +145,7 @@ local MainTitle = Instance.new("TextLabel", mainFrame)
 MainTitle.Size = UDim2.new(1, -50, 0, 35)
 MainTitle.Position = UDim2.new(0, 12, 0, 4)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Text = "FLING DELUXE 2.6"
+MainTitle.Text = "FLING DELUXE 2.7"
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainTitle.TextSize = 13
 MainTitle.Font = Enum.Font.GothamBold
@@ -171,7 +170,6 @@ CreatorCredits.TextColor3 = Color3.fromRGB(140, 140, 140)
 CreatorCredits.TextSize = 10
 CreatorCredits.Font = Enum.Font.GothamBold
 CreatorCredits.TextXAlignment = Enum.TextXAlignment.Right
-
 
 local dragging, dragInput, dragStart, startPos
 local function updateDrag(input)
@@ -256,7 +254,6 @@ LeftTitle.TextSize = 11
 LeftTitle.Font = Enum.Font.GothamBold
 LeftTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-
 local toggleButtonInstant = InstanceNew("TextButton", LeftModuleFrame)
 toggleButtonInstant.Size = UDim2.new(1, -90, 0, 28) 
 toggleButtonInstant.Position = UDim2.new(0, 10, 0, 30)
@@ -279,7 +276,6 @@ instantValueBox.TextSize = 10
 instantValueBox.Font = Enum.Font.GothamMedium
 instantValueBox.BorderSizePixel = 0
 addCorner(instantValueBox, 6)
-
 
 local toggleButtonTween = InstanceNew("TextButton", LeftModuleFrame)
 toggleButtonTween.Size = UDim2.new(1, -90, 0, 28) 
@@ -346,49 +342,176 @@ addCorner(walkValueBox, 6)
 
 
 local TargetModuleFrame = Instance.new("Frame", scrollFrame)
-TargetModuleFrame.Size = UDim2.new(1, -4, 0, 145) 
+TargetModuleFrame.Size = UDim2.new(1, -4, 0, 285)
 TargetModuleFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
 TargetModuleFrame.BorderSizePixel = 0
 addCorner(TargetModuleFrame, 8)
 
-local TargetTitle = InstanceNew("TextLabel", TargetModuleFrame)
-TargetTitle.Size = UDim2.new(1, -20, 0, 25)
-TargetTitle.Position = UDim2.new(0, 10, 0, 2)
+local TargetTitle = Instance.new("TextLabel", TargetModuleFrame)
+TargetTitle.Size = UDim2.new(1, -120, 0, 22)
+TargetTitle.Position = UDim2.new(0, 10, 0, 4)
 TargetTitle.BackgroundTransparency = 1
-TargetTitle.Text = "LOOP TARGET FLING"
-TargetTitle.TextColor3 = Color3.fromRGB(255, 255, 255) 
+TargetTitle.Text = "LOOP TARGET (MULTI)"
+TargetTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 TargetTitle.TextSize = 11
 TargetTitle.Font = Enum.Font.GothamBold
 TargetTitle.TextXAlignment = Enum.TextXAlignment.Left
 
-local targetTextBox = Instance.new("TextBox", TargetModuleFrame)
-targetTextBox.Size = UDim2.new(1, -20, 0, 28)
-targetTextBox.Position = UDim2.new(0, 10, 0, 30)
-targetTextBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-targetTextBox.Text = ""
-targetTextBox.PlaceholderText = "Target Username..."
-targetTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-targetTextBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
-targetTextBox.TextSize = 10
-targetTextBox.Font = Enum.Font.GothamMedium
-targetTextBox.ClearTextOnFocus = false
-targetTextBox.BorderSizePixel = 0
-addCorner(targetTextBox, 6)
+local AllBtn = Instance.new("TextButton", TargetModuleFrame)
+AllBtn.Size = UDim2.new(0, 46, 0, 18)
+AllBtn.Position = UDim2.new(1, -108, 0, 5)
+AllBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+AllBtn.Text = "ALL"
+AllBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+AllBtn.TextSize = 10
+AllBtn.Font = Enum.Font.GothamBold
+AllBtn.BorderSizePixel = 0
+addCorner(AllBtn, 4)
 
-local toggleButtonLoop = InstanceNew("TextButton", TargetModuleFrame)
-toggleButtonLoop.Size = UDim2.new(1, -90, 0, 28) 
-toggleButtonLoop.Position = UDim2.new(0, 10, 0, 66)
-toggleButtonLoop.Text = "Loop Target: OFF"
-toggleButtonLoop.TextSize = 10
-toggleButtonLoop.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButtonLoop.Font = Enum.Font.GothamMedium
-toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleButtonLoop.BorderSizePixel = 0
-addCorner(toggleButtonLoop, 6)
+local NoneBtn = Instance.new("TextButton", TargetModuleFrame)
+NoneBtn.Size = UDim2.new(0, 46, 0, 18)
+NoneBtn.Position = UDim2.new(1, -55, 0, 5)
+NoneBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+NoneBtn.Text = "NONE"
+NoneBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+NoneBtn.TextSize = 10
+NoneBtn.Font = Enum.Font.GothamBold
+NoneBtn.BorderSizePixel = 0
+addCorner(NoneBtn, 4)
+
+local PlayerList = Instance.new("ScrollingFrame", TargetModuleFrame)
+PlayerList.Size = UDim2.new(1, -16, 0, 155)
+PlayerList.Position = UDim2.new(0, 8, 0, 28)
+PlayerList.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+PlayerList.BorderSizePixel = 0
+PlayerList.ScrollBarThickness = 4
+PlayerList.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
+PlayerList.CanvasSize = UDim2.new(0, 0, 0, 0)
+PlayerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+addCorner(PlayerList, 6)
+
+local listLayout = Instance.new("UIListLayout", PlayerList)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Padding = UDim.new(0, 3)
+
+local function refreshPlayerList()
+	for _, child in ipairs(PlayerList:GetChildren()) do
+		if child:IsA("GuiObject") then
+			child:Destroy()
+		end
+	end
+
+	local list = {}
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= player then
+			table.insert(list, p)
+		end
+	end
+	table.sort(list, function(a, b)
+		return a.Name:lower() < b.Name:lower()
+	end)
+
+	for p in pairs(selectedPlayers) do
+		if not p.Parent or p == player then
+			selectedPlayers[p] = nil
+		end
+	end
+
+	for i, plr in ipairs(list) do
+		local isSelected = selectedPlayers[plr] == true
+
+		local row = Instance.new("TextButton", PlayerList)
+		row.Size = UDim2.new(1, -6, 0, 28)
+		row.BackgroundColor3 = isSelected and Color3.fromRGB(50, 22, 22) or Color3.fromRGB(30, 30, 30)
+		row.BackgroundTransparency = isSelected and 0 or 0.25
+		row.BorderSizePixel = 0
+		row.AutoButtonColor = false
+		row.Text = ""
+		row.LayoutOrder = i
+		addCorner(row, 5)
+
+		if isSelected then
+			local stroke = Instance.new("UIStroke", row)
+			stroke.Color = Color3.fromRGB(220, 40, 40)
+			stroke.Thickness = 1
+			stroke.Transparency = 0.25
+		end
+
+		local thumb = Instance.new("ImageLabel", row)
+		thumb.Size = UDim2.new(0, 22, 0, 22)
+		thumb.Position = UDim2.new(0, 4, 0.5, -11)
+		thumb.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+		thumb.BorderSizePixel = 0
+		thumb.Image = "rbxthumb://type=AvatarHeadShot&id=" .. plr.UserId .. "&w=48&h=48"
+		thumb.ScaleType = Enum.ScaleType.Crop
+		addCorner(thumb, 11)
+
+		local box = Instance.new("Frame", row)
+		box.Size = UDim2.new(0, 14, 0, 14)
+		box.Position = UDim2.new(0, 32, 0.5, -7)
+		box.BackgroundColor3 = isSelected and Color3.fromRGB(220, 40, 40) or Color3.fromRGB(40, 40, 40)
+		box.BorderSizePixel = 0
+		addCorner(box, 3)
+
+		if isSelected then
+			local check = Instance.new("TextLabel", box)
+			check.Size = UDim2.new(1, 0, 1, 0)
+			check.BackgroundTransparency = 1
+			check.Text = "✓"
+			check.TextColor3 = Color3.new(1, 1, 1)
+			check.TextSize = 11
+			check.Font = Enum.Font.GothamBold
+		end
+
+		local nameLabel = Instance.new("TextLabel", row)
+		nameLabel.Size = UDim2.new(1, -55, 1, 0)
+		nameLabel.Position = UDim2.new(0, 52, 0, 0)
+		nameLabel.BackgroundTransparency = 1
+		nameLabel.Text = (plr.DisplayName ~= plr.Name) and (plr.DisplayName .. "  (@" .. plr.Name .. ")") or plr.Name
+		nameLabel.TextColor3 = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 180, 180)
+		nameLabel.TextSize = 11
+		nameLabel.Font = Enum.Font.GothamMedium
+		nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+		nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+
+		row.MouseButton1Click:Connect(function()
+			if selectedPlayers[plr] then
+				selectedPlayers[plr] = nil
+			else
+				selectedPlayers[plr] = true
+			end
+			refreshPlayerList()
+		end)
+	end
+end
+
+AllBtn.MouseButton1Click:Connect(function()
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= player then
+			selectedPlayers[p] = true
+		end
+	end
+	refreshPlayerList()
+end)
+
+NoneBtn.MouseButton1Click:Connect(function()
+	table.clear(selectedPlayers)
+	refreshPlayerList()
+end)
+
+Players.PlayerAdded:Connect(function()
+	task.defer(refreshPlayerList)
+end)
+Players.PlayerRemoving:Connect(function(p)
+	selectedPlayers[p] = nil
+	task.defer(refreshPlayerList)
+end)
+
+refreshPlayerList()
 
 local loopValueBox = Instance.new("TextBox", TargetModuleFrame)
-loopValueBox.Size = UDim2.new(0, 65, 0, 28)
-loopValueBox.Position = UDim2.new(1, -75, 0, 66)
+loopValueBox.Size = UDim2.new(0, 65, 0, 26)
+loopValueBox.Position = UDim2.new(1, -75, 0, 195)
 loopValueBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 loopValueBox.Text = "90000000"
 loopValueBox.PlaceholderText = "Force"
@@ -398,20 +521,20 @@ loopValueBox.Font = Enum.Font.GothamMedium
 loopValueBox.BorderSizePixel = 0
 addCorner(loopValueBox, 6)
 
-local toggleButtonLoopAll = InstanceNew("TextButton", TargetModuleFrame)
-toggleButtonLoopAll.Size = UDim2.new(1, -90, 0, 28) 
-toggleButtonLoopAll.Position = UDim2.new(0, 10, 0, 102)
-toggleButtonLoopAll.Text = "Loop Target All: OFF"
-toggleButtonLoopAll.TextSize = 10
-toggleButtonLoopAll.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButtonLoopAll.Font = Enum.Font.GothamMedium
-toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleButtonLoopAll.BorderSizePixel = 0
-addCorner(toggleButtonLoopAll, 6)
+local toggleButtonLoop = Instance.new("TextButton", TargetModuleFrame)
+toggleButtonLoop.Size = UDim2.new(1, -90, 0, 28)
+toggleButtonLoop.Position = UDim2.new(0, 10, 0, 193)
+toggleButtonLoop.Text = "Loop Selected: OFF"
+toggleButtonLoop.TextSize = 10
+toggleButtonLoop.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButtonLoop.Font = Enum.Font.GothamMedium
+toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleButtonLoop.BorderSizePixel = 0
+addCorner(toggleButtonLoop, 6)
 
 local loopAllValueBox = Instance.new("TextBox", TargetModuleFrame)
-loopAllValueBox.Size = UDim2.new(0, 65, 0, 28)
-loopAllValueBox.Position = UDim2.new(1, -75, 0, 102)
+loopAllValueBox.Size = UDim2.new(0, 65, 0, 26)
+loopAllValueBox.Position = UDim2.new(1, -75, 0, 231)
 loopAllValueBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 loopAllValueBox.Text = "90000000"
 loopAllValueBox.PlaceholderText = "Force"
@@ -421,165 +544,19 @@ loopAllValueBox.Font = Enum.Font.GothamMedium
 loopAllValueBox.BorderSizePixel = 0
 addCorner(loopAllValueBox, 6)
 
+local toggleButtonLoopAll = Instance.new("TextButton", TargetModuleFrame)
+toggleButtonLoopAll.Size = UDim2.new(1, -90, 0, 28)
+toggleButtonLoopAll.Position = UDim2.new(0, 10, 0, 229)
+toggleButtonLoopAll.Text = "Loop Target All: OFF"
+toggleButtonLoopAll.TextSize = 10
+toggleButtonLoopAll.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButtonLoopAll.Font = Enum.Font.GothamMedium
+toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleButtonLoopAll.BorderSizePixel = 0
+addCorner(toggleButtonLoopAll, 6)
 
-local searchScroll = Instance.new("ScrollingFrame", screenGui)
-searchScroll.Size = UDim2.new(0, 310, 0, 120)
-searchScroll.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-searchScroll.BorderSizePixel = 0
-searchScroll.Visible = false
-searchScroll.ZIndex = 10
-searchScroll.ScrollBarThickness = 3
-searchScroll.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
-searchScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-searchScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-addCorner(searchScroll, 6)
 
-local success, errorMessage = pcall(function()
-    local searchLayout = Instance.new("UIListLayout", searchScroll)
-    searchLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    local function updateSearchPosition()
-        pcall(function()
-            searchScroll.Position = UDim2.new(0, targetTextBox.AbsolutePosition.X, 0, targetTextBox.AbsolutePosition.Y + targetTextBox.AbsoluteSize.Y + 4)
-        end)
-    end
-
-    targetTextBox:GetPropertyChangedSignal("AbsolutePosition"):Connect(updateSearchPosition)
-
-    local function updateSearchList()
-    
-    pcall(function()
-        for _, item in ipairs(searchScroll:GetChildren()) do
-            if item:IsA("TextButton") then 
-                item:Destroy() 
-            end
-        end
-    end)
-    
-    local text = targetTextBox.Text:lower():gsub("%s+", "")
-    local matches = {}
-
-    table.insert(matches, { textToShow = "None", targetValue = "None" })
-
-    
-    pcall(function()
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= player then
-                local username = p.Name
-                local displayName = p.DisplayName
-                
-                local nameClean = username:lower():gsub("%s+", "")
-                local dnameClean = displayName:lower():gsub("%s+", "")
-                
-                if text == "" or nameClean:find(text, 1, true) or dnameClean:find(text, 1, true) then
-                    table.insert(matches, {
-                        textToShow = username .. " (" .. displayName .. ")",
-                        targetValue = username
-                    })
-                end
-            end
-        end
-    end)
-    
-
-    for _, itemData in ipairs(matches) do
-        pcall(function()
-            local btn = Instance.new("TextButton", searchScroll)
-            btn.Size = UDim2.new(1, 0, 0, 24)
-            btn.BackgroundTransparency = 1
-            btn.Text = "  " .. itemData.textToShow
-            btn.TextColor3 = (itemData.targetValue == "None") and Color3.fromRGB(200, 70, 70) or Color3.fromRGB(220, 220, 220)
-            btn.TextXAlignment = Enum.TextXAlignment.Left
-            btn.TextSize = 10
-            btn.Font = Enum.Font.GothamMedium
-            btn.ZIndex = 11
-            
-            btn.MouseEnter:Connect(function()
-                pcall(function()
-                    btn.BackgroundTransparency = 0.9
-                    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                end)
-            end)
-            
-            btn.MouseLeave:Connect(function()
-                pcall(function()
-                    btn.BackgroundTransparency = 1
-                end)
-            end)
-            
-            btn.MouseButton1Click:Connect(function()
-                pcall(function()
-                    if itemData.targetValue == "None" then
-                        targetTextBox.Text = ""
-                        if loopTargeting then
-                            loopTargeting = false
-                            if toggleButtonLoop then
-                                toggleButtonLoop.Text = "Loop Target: OFF"
-                                toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                            end
-                            if currentThread then task.cancel(currentThread) end
-                        end
-                    else
-                        targetTextBox.Text = itemData.targetValue
-                    end
-
-                    searchScroll.Visible = false
-                    targetTextBox:ReleaseFocus()
-                end)
-            end)
-        end)
-    end
-end
-
-    targetTextBox:GetPropertyChangedSignal("Text"):Connect(function()
-        updateSearchList()
-    end)
-
-    targetTextBox.Focused:Connect(function()
-        updateSearchPosition()
-        updateSearchList()
-        searchScroll.Visible = true
-    end)
-
-    Players.PlayerAdded:Connect(function(newPlayer)
-        if searchScroll.Visible then
-            updateSearchList()
-        end
-    end)
-
-    Players.PlayerRemoving:Connect(function(leftPlayer)
-        pcall(function()
-            if targetTextBox.Text:lower() == leftPlayer.Name:lower() then
-                targetTextBox.Text = ""
-                if loopTargeting then
-                    loopTargeting = false
-                    toggleButtonLoop.Text = "Loop Target: OFF"
-                    toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                    if LOOPPROTECT then 
-                        pcall(function() LOOPPROTECT:Destroy() end) 
-                        LOOPPROTECT = nil 
-                    end
-                end
-            end
-            
-            if searchScroll.Visible then
-                updateSearchList()
-            end
-        end)
-    end)
-
-    UserInputService.InputBegan:Connect(function(input, gpe)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            task.wait(0.05)
-            pcall(function()
-                if not targetTextBox:IsFocused() and searchScroll.Visible then
-                    searchScroll.Visible = false
-                end
-            end)
-        end
-    end)
-
-  local clickFlingMode = "Instant" 
+local clickFlingMode = "Instant" 
 
 MouseButtonFix(toggleButtonInstant, function()
     pcall(function()
@@ -616,7 +593,6 @@ MouseButtonFix(toggleButtonTween, function()
 end)
 
 local function ApplyFlingForces(myRoot, targetRoot, forceVal)
-    
     local character = myRoot.Parent
     for _, part in ipairs(character:GetDescendants()) do
         if part:IsA("BasePart") then
@@ -636,7 +612,6 @@ local function ApplyFlingForces(myRoot, targetRoot, forceVal)
         end)
     end
 
-    
     pcall(function()
         myRoot.AssemblyLinearVelocity = Vector3.zero
         myRoot.AssemblyAngularVelocity = Vector3.zero
@@ -664,7 +639,6 @@ local function TweenClickFling(myRoot, targetRoot, forceVal)
         ApplyFlingForces(myRoot, targetRoot, forceVal)
     end)
 end
-
 
 local mouse = player:GetMouse()
 local isFlinging = false
@@ -708,11 +682,9 @@ mouse.Button1Down:Connect(function()
         TweenClickFling(myRoot, targetRoot, forceVal)
     end
 
-  
     myRoot.CFrame = oldCFrame
     myRoot.AssemblyLinearVelocity = Vector3.zero
     myRoot.AssemblyAngularVelocity = Vector3.zero
-    
     
     for _, part in ipairs(myChar:GetDescendants()) do
         if part:IsA("BasePart") then
@@ -724,336 +696,314 @@ mouse.Button1Down:Connect(function()
 end)
 
 
-
-    local function startWalkFlingLoop()
-        pcall(function()
-            local char = player.Character
-            local hum = getPlrHum(char)
-            if hum then
-                local deathConn
-                deathConn = hum.Died:Connect(function()
-                    pcall(function()
-                        walkflinging = false
-                        toggleButtonRight.Text = "Walk Fling: OFF"
-                        toggleButtonRight.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                        if deathConn then deathConn:Disconnect() end
-                    end)
+local function startWalkFlingLoop()
+    pcall(function()
+        local char = player.Character
+        local hum = getPlrHum(char)
+        if hum then
+            local deathConn
+            deathConn = hum.Died:Connect(function()
+                pcall(function()
+                    walkflinging = false
+                    toggleButtonRight.Text = "Walk Fling: OFF"
+                    toggleButtonRight.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                    if deathConn then deathConn:Disconnect() end
                 end)
-            end
-
-            task.spawn(function()
-                local movel = 0.1
-                while walkflinging do
-                    RunService.Heartbeat:Wait()
-                    
-                    pcall(function()
-                        local character = player.Character
-                        local root = getRoot(character)
-                        local mult = tonumber(walkValueBox.Text) or 90000000
-                        
-                        if character and character.Parent and root and root.Parent then
-                            local vel = root.Velocity
-                            root.Velocity = vel * mult + Vector3.new(0, mult, 0)
-
-                            RunService.RenderStepped:Wait()
-                            if character and character.Parent and root and root.Parent then
-                                root.Velocity = vel
-                            end
-
-                            RunService.Stepped:Wait()
-                            if character and character.Parent and root and root.Parent then
-                                root.Velocity = vel + Vector3.new(0, movel, 0)
-                                movel = movel * -1
-                            end
-                        end
-                    end)
-                end
             end)
-        end)
-    end
+        end
 
-    MouseButtonFix(toggleButtonRight, function()
-        pcall(function()
-            walkflinging = not walkflinging
-            if walkflinging then
-                toggleButtonRight.Text = "Walk Fling: ON"
-                toggleButtonRight.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
-                startWalkFlingLoop()
-            else
-                toggleButtonRight.Text = "Walk Fling: OFF"
-                toggleButtonRight.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        task.spawn(function()
+            local movel = 0.1
+            while walkflinging do
+                RunService.Heartbeat:Wait()
+                
+                pcall(function()
+                    local character = player.Character
+                    local root = getRoot(character)
+                    local mult = tonumber(walkValueBox.Text) or 90000000
+                    
+                    if character and character.Parent and root and root.Parent then
+                        local vel = root.Velocity
+                        root.Velocity = vel * mult + Vector3.new(0, mult, 0)
+
+                        RunService.RenderStepped:Wait()
+                        if character and character.Parent and root and root.Parent then
+                            root.Velocity = vel
+                        end
+
+                        RunService.Stepped:Wait()
+                        if character and character.Parent and root and root.Parent then
+                            root.Velocity = vel + Vector3.new(0, movel, 0)
+                            movel = movel * -1
+                        end
+                    end
+                end)
             end
         end)
     end)
+end
+
+MouseButtonFix(toggleButtonRight, function()
+    pcall(function()
+        walkflinging = not walkflinging
+        if walkflinging then
+            toggleButtonRight.Text = "Walk Fling: ON"
+            toggleButtonRight.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+            startWalkFlingLoop()
+        else
+            toggleButtonRight.Text = "Walk Fling: OFF"
+            toggleButtonRight.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end
+    end)
 end)
 
-if not success then
-    warn("Error initializing the UI module Walk Fling or Clik Fling or Tween Fling :", errorMessage)
-end
 
 local success, errorMessage = pcall(function()
-    local loopTargeting = false
-    local loopTargetingAll = false
+	local loopTargeting = false
+	local loopTargetingAll = false
 
-    local function startLoopTargetAction(isModeAll)
-        task.spawn(function()
-            while (isModeAll and loopTargetingAll) or (not isModeAll and loopTargeting) do
-                local successLoop, errLoop = pcall(function()
-                    local targetName = targetTextBox.Text:lower():gsub("%s+", "")
-                    
-                    if not isModeAll and targetName == "" then 
-                        task.wait(0.1)
-                        return 
-                    end
+	local function startLoopTargetAction(isModeAll)
+		task.spawn(function()
+			while (isModeAll and loopTargetingAll) or (not isModeAll and loopTargeting) do
+				local successLoop = pcall(function()
+					local isAll = isModeAll
 
-                    local isAll = isModeAll or (targetName == "all" or targetName == "others")
+					local FlingDeluxePro = function(TargetPlayer)
+						local successFling = pcall(function()
+							local isStillActive = isModeAll and loopTargetingAll or loopTargeting
+							if not isStillActive or not TargetPlayer or not TargetPlayer.Parent or TargetPlayer == player then return end
 
-                    local GetPlayer = function(Name)
-                        if Name == "random" then
-                            local GetPlayers = Players:GetPlayers()
-                            local myIndex = Discover(GetPlayers, player)
-                            if myIndex then
-                                table.remove(GetPlayers, myIndex)
-                            end
-                            if #GetPlayers > 0 then
-                                return GetPlayers[math.random(#GetPlayers)]
-                            end
-                        else
-                            for _, x in next, Players:GetPlayers() do
-                                if x ~= player then
-                                    local n = x.Name:lower():gsub("%s+", "")
-                                    local d = x.DisplayName:lower():gsub("%s+", "")
-                                    if n:match("^"..Name) or d:match("^"..Name) then
-                                        return x
-                                    end
-                                end
-                            end
-                        end
-                        return nil
-                    end     
+							if LOOPPROTECT then pcall(function() LOOPPROTECT:Destroy() end) LOOPPROTECT = nil end
 
-                    local FlingDeluxePro = function(TargetPlayer)
-                        local successFling, errFling = pcall(function()
-                            local isStillActive = isModeAll and loopTargetingAll or loopTargeting
-                            if not isStillActive or not TargetPlayer or not TargetPlayer.Parent or TargetPlayer == player then return end
-                            
-                            if LOOPPROTECT then pcall(function() LOOPPROTECT:Destroy() end) LOOPPROTECT = nil end
-                            
-                            local Character = player.Character
-                            if not Character or not Character.Parent or not Character:FindFirstChild("Humanoid") then
-                                Character = player.CharacterAdded:Wait()
-                            end
-                            
-                            local Humanoid = getPlrHum(Character)
-                            local HRP = Character:WaitForChild("HumanoidRootPart", 2) or (Humanoid and Humanoid.RootPart)
-                            local camera = workspace.CurrentCamera
-                            
-                            if not Humanoid or Humanoid.Health <= 0 or not HRP then return end
-                            
-                            local TCharacter = TargetPlayer.Character
-                            if not TCharacter or not TCharacter.Parent then return end
-                            
-                            local THumanoid = getPlrHum(TCharacter)
-                            if not THumanoid or THumanoid.Health <= 0 then return end
+							local Character = player.Character
+							if not Character or not Character.Parent or not Character:FindFirstChild("Humanoid") then
+								Character = player.CharacterAdded:Wait()
+							end
 
-                            LOOPPROTECT = InstanceNew("Part")
-                            LOOPPROTECT.Size = Vector3.new(1, 1, 1)
-                            LOOPPROTECT.Transparency = 1
-                            LOOPPROTECT.CanCollide = false
-                            LOOPPROTECT.Anchored = false
-                            LOOPPROTECT.Parent = camera
-                            
-                            local weld = InstanceNew("WeldConstraint")
-                            weld.Part0 = HRP
-                            weld.Part1 = LOOPPROTECT
-                            weld.Parent = LOOPPROTECT
-                            
-                            local bodyGyro = InstanceNew("BodyGyro")
-                            bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-                            bodyGyro.D = 1000
-                            bodyGyro.P = 2000
-                            bodyGyro.Parent = LOOPPROTECT
-                            
-                            local RootPart = HRP
-                            local TRootPart = THumanoid.RootPart
-                            local THead = getHead(TCharacter)
-                            local Accessory = TCharacter:FindFirstChildOfClass("Accessory")
-                            local Handle = Accessory and Accessory:FindFirstChild("Handle")
-                            
-                            if not flingManager.lFlingOldPos or RootPart.Velocity.Magnitude < 50 then
-                                flingManager.lFlingOldPos = RootPart.CFrame
-                            end
-                            
-                            if TCharacter:FindFirstChildWhichIsA("BasePart") then
-                                if THead then
-                                    camera.CameraSubject = THead
-                                elseif Handle then
-                                    camera.CameraSubject = Handle
-                                elseif THumanoid then
-                                    camera.CameraSubject = THumanoid
-                                end
-                                
-                                local customForce = isAll and (tonumber(loopAllValueBox.Text) or 90000000) or (tonumber(loopValueBox.Text) or 90000000)
+							local Humanoid = getPlrHum(Character)
+							local HRP = Character:WaitForChild("HumanoidRootPart", 2) or (Humanoid and Humanoid.RootPart)
+							local camera = workspace.CurrentCamera
 
-                                local FPos = function(BasePart, Pos, Ang)
-                                    if not RootPart or not Character or not Character.Parent or Humanoid.Health <= 0 then return end
-                                    RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
-                                    Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
-                                    RootPart.Velocity = Vector3.new(customForce, customForce * 10, customForce)
-                                    RootPart.RotVelocity = Vector3.new(customForce * 10, customForce * 10, customForce * 10)
-                                end
-                                
-                                local SFBasePart = function(BasePart)
-                                    local TimeToWait = 2
-                                    local Time = tick()
-                                    local Angle = 0
-                                    repeat
-                                        if RootPart and Character.Parent and Humanoid.Health > 0 and THumanoid and TCharacter and TCharacter.Parent and THumanoid.Health > 0 then
-                                            if BasePart.Velocity.Magnitude < 50 then
-                                                Angle = Angle + 100
-                                                FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
-                                            else
-                                                FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, -1.5, -THumanoid.WalkSpeed), CFrame.Angles(0, 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, 1.5, TRootPart and TRootPart.Velocity.Magnitude / 1.25 or 0), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, -1.5, -(TRootPart and TRootPart.Velocity.Magnitude / 1.25 or 0)), CFrame.Angles(0, 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, 1.5, TRootPart and TRootPart.Velocity.Magnitude / 1.25 or 0), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(-90), 0, 0)) task.wait()
-                                                FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0)) task.wait()
-                                            end
-                                        else
-                                            break
-                                        end
-                                    until not (isModeAll and loopTargetingAll or loopTargeting) or not BasePart or not BasePart.Parent or BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or TargetPlayer.Character ~= TCharacter or Humanoid.Health <= 0 or THumanoid.Health <= 0 or tick() > Time + TimeToWait
-                                end
-                                
-                                local OrgDestroyHeight = workspace.FallenPartsDestroyHeight
-                                workspace.FallenPartsDestroyHeight = 0/0
-                                
-                                local BV = InstanceNew("BodyVelocity")
-                                BV.Parent = RootPart
-                                BV.Velocity = Vector3.new(customForce, customForce, customForce)
-                                BV.MaxForce = Vector3.new(1/0, 1/0, 1/0)
-                                
-                                Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-                                
-                                if TRootPart and THead then
-                                    if (TRootPart.CFrame.p - THead.CFrame.p).Magnitude > 5 then SFBasePart(THead) else SFBasePart(TRootPart) end
-                                elseif TRootPart then
-                                    SFBasePart(TRootPart)
-                                elseif THead then
-                                    SFBasePart(THead)
-                                elseif Accessory and Handle then
-                                    SFBasePart(Handle)
-                                end
-                                
-                                if BV then BV:Destroy() end
-                                if Humanoid and Humanoid.Parent then
-                                    Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
-                                    camera.CameraSubject = Humanoid
-                                end
-                                
-                                local resetTimeout = tick() + 1
-                                repeat
-                                    if RootPart and flingManager.lFlingOldPos and Humanoid.Health > 0 then
-                                        RootPart.CFrame = flingManager.lFlingOldPos * CFrame.new(0, 0.5, 0)
-                                        Character:SetPrimaryPartCFrame(flingManager.lFlingOldPos * CFrame.new(0, 0.5, 0))
-                                        Humanoid:ChangeState("GettingUp")
-                                        for _, x in next, Character:GetChildren() do
-                                            if x:IsA("BasePart") then
-                                                x.Velocity, x.RotVelocity = Vector3.new(), Vector3.new()
-                                            end
-                                        end
-                                    end
-                                    task.wait()
-                                until not (isModeAll and loopTargetingAll or loopTargeting) or not RootPart or Humanoid.Health <= 0 or (RootPart.Position - flingManager.lFlingOldPos.p).Magnitude < 25 or tick() > resetTimeout
-                                
-                                workspace.FallenPartsDestroyHeight = OrgDestroyHeight
-                            end
-                        end)
+							if not Humanoid or Humanoid.Health <= 0 or not HRP then return end
 
-                        if LOOPPROTECT then pcall(function() LOOPPROTECT:Destroy() end) LOOPPROTECT = nil end
-                    end
+							local TCharacter = TargetPlayer.Character
+							if not TCharacter or not TCharacter.Parent then return end
 
-                    local char = player.Character
-                    local hum = char and char:FindFirstChildOfClass("Humanoid")
-                    if not char or not hum or hum.Health <= 0 then
-                        task.wait(1)
-                        return
-                    end
+							local THumanoid = getPlrHum(TCharacter)
+							if not THumanoid or THumanoid.Health <= 0 then return end
 
-                    if isAll then
-                        for _, x in next, Players:GetPlayers() do
-                            local activeCheck = isModeAll and loopTargetingAll or loopTargeting
-                            if not activeCheck then break end
-                            if x ~= player and x.UserId ~= 1414978355 then
-                                FlingDeluxePro(x)
-                                task.wait(0.1)
-                            end
-                        end
-                    else
-                        local TP = GetPlayer(targetName)
-                        if TP and TP ~= player and TP.UserId ~= 1414978355 then
-                            FlingDeluxePro(TP)
-                        end
-                    end
-                end)
+							LOOPPROTECT = InstanceNew("Part")
+							LOOPPROTECT.Size = Vector3.new(1, 1, 1)
+							LOOPPROTECT.Transparency = 1
+							LOOPPROTECT.CanCollide = false
+							LOOPPROTECT.Anchored = false
+							LOOPPROTECT.Parent = camera
 
-                if not successLoop then
-                    task.wait(0.2)
-                end
-                task.wait(0.1)
-            end
-        end)
-    end
+							local weld = InstanceNew("WeldConstraint")
+							weld.Part0 = HRP
+							weld.Part1 = LOOPPROTECT
+							weld.Parent = LOOPPROTECT
 
-    MouseButtonFix(toggleButtonLoop, function()
-        loopTargeting = not loopTargeting
-        if loopTargeting then
-            loopTargetingAll = false
-            toggleButtonLoopAll.Text = "Loop Target All: OFF"
-            toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            
-            toggleButtonLoop.Text = "Loop Target: ON"
-            toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
-            startLoopTargetAction(false)
-        else
-            toggleButtonLoop.Text = "Loop Target: OFF"
-            toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            if LOOPPROTECT then pcall(function() LOOPPROTECT:Destroy() end) LOOPPROTECT = nil end
-        end
-    end)
+							local bodyGyro = InstanceNew("BodyGyro")
+							bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+							bodyGyro.D = 1000
+							bodyGyro.P = 2000
+							bodyGyro.Parent = LOOPPROTECT
 
-    MouseButtonFix(toggleButtonLoopAll, function()
-        loopTargetingAll = not loopTargetingAll
-        if loopTargetingAll then
-            loopTargeting = false
-            toggleButtonLoop.Text = "Loop Target: OFF"
-            toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            
-            toggleButtonLoopAll.Text = "Loop Target All: ON"
-            toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
-            startLoopTargetAction(true)
-        else
-            toggleButtonLoopAll.Text = "Loop Target All: OFF"
-            toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            if LOOPPROTECT then pcall(function() LOOPPROTECT:Destroy() end) LOOPPROTECT = nil end
-        end
-    end)
+							local RootPart = HRP
+							local TRootPart = THumanoid.RootPart
+							local THead = getHead(TCharacter)
+							local Accessory = TCharacter:FindFirstChildOfClass("Accessory")
+							local Handle = Accessory and Accessory:FindFirstChild("Handle")
+
+							if not flingManager.lFlingOldPos or RootPart.Velocity.Magnitude < 50 then
+								flingManager.lFlingOldPos = RootPart.CFrame
+							end
+
+							if TCharacter:FindFirstChildWhichIsA("BasePart") then
+								if THead then
+									camera.CameraSubject = THead
+								elseif Handle then
+									camera.CameraSubject = Handle
+								elseif THumanoid then
+									camera.CameraSubject = THumanoid
+								end
+
+								local customForce = isAll and (tonumber(loopAllValueBox.Text) or 90000000) or (tonumber(loopValueBox.Text) or 90000000)
+
+								local FPos = function(BasePart, Pos, Ang)
+									if not RootPart or not Character or not Character.Parent or Humanoid.Health <= 0 then return end
+									RootPart.CFrame = CFrame.new(BasePart.Position) * Pos * Ang
+									Character:SetPrimaryPartCFrame(CFrame.new(BasePart.Position) * Pos * Ang)
+									RootPart.Velocity = Vector3.new(customForce, customForce * 10, customForce)
+									RootPart.RotVelocity = Vector3.new(customForce * 10, customForce * 10, customForce * 10)
+								end
+
+								local SFBasePart = function(BasePart)
+									local TimeToWait = 2
+									local Time = tick()
+									local Angle = 0
+									repeat
+										if RootPart and Character.Parent and Humanoid.Health > 0 and THumanoid and TCharacter and TCharacter.Parent and THumanoid.Health > 0 then
+											if BasePart.Velocity.Magnitude < 50 then
+												Angle = Angle + 100
+												FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(2.25, 1.5, -2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(-2.25, -1.5, 2.25) + THumanoid.MoveDirection * BasePart.Velocity.Magnitude / 1.25, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, 1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, -1.5, 0) + THumanoid.MoveDirection, CFrame.Angles(math.rad(Angle), 0, 0)) task.wait()
+											else
+												FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, -1.5, -THumanoid.WalkSpeed), CFrame.Angles(0, 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, 1.5, THumanoid.WalkSpeed), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, 1.5, TRootPart and TRootPart.Velocity.Magnitude / 1.25 or 0), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, -1.5, -(TRootPart and TRootPart.Velocity.Magnitude / 1.25 or 0)), CFrame.Angles(0, 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, 1.5, TRootPart and TRootPart.Velocity.Magnitude / 1.25 or 0), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(90), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(math.rad(-90), 0, 0)) task.wait()
+												FPos(BasePart, CFrame.new(0, -1.5, 0), CFrame.Angles(0, 0, 0)) task.wait()
+											end
+										else
+											break
+										end
+									until not (isModeAll and loopTargetingAll or loopTargeting) or not BasePart or not BasePart.Parent or BasePart.Velocity.Magnitude > 500 or BasePart.Parent ~= TargetPlayer.Character or TargetPlayer.Parent ~= Players or TargetPlayer.Character ~= TCharacter or Humanoid.Health <= 0 or THumanoid.Health <= 0 or tick() > Time + TimeToWait
+								end
+
+								local OrgDestroyHeight = workspace.FallenPartsDestroyHeight
+								workspace.FallenPartsDestroyHeight = 0/0
+
+								local BV = InstanceNew("BodyVelocity")
+								BV.Parent = RootPart
+								BV.Velocity = Vector3.new(customForce, customForce, customForce)
+								BV.MaxForce = Vector3.new(1/0, 1/0, 1/0)
+
+								Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+
+								if TRootPart and THead then
+									if (TRootPart.CFrame.p - THead.CFrame.p).Magnitude > 5 then SFBasePart(THead) else SFBasePart(TRootPart) end
+								elseif TRootPart then
+									SFBasePart(TRootPart)
+								elseif THead then
+									SFBasePart(THead)
+								elseif Accessory and Handle then
+									SFBasePart(Handle)
+								end
+
+								if BV then BV:Destroy() end
+								if Humanoid and Humanoid.Parent then
+									Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+									camera.CameraSubject = Humanoid
+								end
+
+								local resetTimeout = tick() + 1
+								repeat
+									if RootPart and flingManager.lFlingOldPos and Humanoid.Health > 0 then
+										RootPart.CFrame = flingManager.lFlingOldPos * CFrame.new(0, 0.5, 0)
+										Character:SetPrimaryPartCFrame(flingManager.lFlingOldPos * CFrame.new(0, 0.5, 0))
+										Humanoid:ChangeState("GettingUp")
+										for _, x in next, Character:GetChildren() do
+											if x:IsA("BasePart") then
+												x.Velocity, x.RotVelocity = Vector3.new(), Vector3.new()
+											end
+										end
+									end
+									task.wait()
+								until not (isModeAll and loopTargetingAll or loopTargeting) or not RootPart or Humanoid.Health <= 0 or (RootPart.Position - flingManager.lFlingOldPos.p).Magnitude < 25 or tick() > resetTimeout
+
+								workspace.FallenPartsDestroyHeight = OrgDestroyHeight
+							end
+						end)
+
+						if LOOPPROTECT then pcall(function() LOOPPROTECT:Destroy() end) LOOPPROTECT = nil end
+					end
+
+					local char = player.Character
+					local hum = char and char:FindFirstChildOfClass("Humanoid")
+					if not char or not hum or hum.Health <= 0 then
+						task.wait(1)
+						return
+					end
+
+					if isAll then
+						for _, x in next, Players:GetPlayers() do
+							local activeCheck = isModeAll and loopTargetingAll or loopTargeting
+							if not activeCheck then break end
+							if x ~= player and x.UserId ~= 1414978355 then
+								FlingDeluxePro(x)
+								task.wait(0.1)
+							end
+						end
+					else
+						local targets = {}
+						for plr in pairs(selectedPlayers) do
+							if plr and plr.Parent and plr ~= player then
+								table.insert(targets, plr)
+							end
+						end
+
+						if #targets == 0 then
+							task.wait(0.3)
+							return
+						end
+
+						for _, TP in ipairs(targets) do
+							if not loopTargeting then break end
+							if TP and TP.Parent and TP.UserId ~= 1414978355 then
+								FlingDeluxePro(TP)
+								task.wait(0.08)
+							end
+						end
+					end
+				end)
+
+				if not successLoop then
+					task.wait(0.2)
+				end
+				task.wait(0.1)
+			end
+		end)
+	end
+
+	MouseButtonFix(toggleButtonLoop, function()
+		loopTargeting = not loopTargeting
+		if loopTargeting then
+			loopTargetingAll = false
+			toggleButtonLoopAll.Text = "Loop Target All: OFF"
+			toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+			toggleButtonLoop.Text = "Loop Selected: ON"
+			toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+			startLoopTargetAction(false)
+		else
+			toggleButtonLoop.Text = "Loop Selected: OFF"
+			toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+			if LOOPPROTECT then pcall(function() LOOPPROTECT:Destroy() end) LOOPPROTECT = nil end
+		end
+	end)
+
+	MouseButtonFix(toggleButtonLoopAll, function()
+		loopTargetingAll = not loopTargetingAll
+		if loopTargetingAll then
+			loopTargeting = false
+			toggleButtonLoop.Text = "Loop Selected: OFF"
+			toggleButtonLoop.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+			toggleButtonLoopAll.Text = "Loop Target All: ON"
+			toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+			startLoopTargetAction(true)
+		else
+			toggleButtonLoopAll.Text = "Loop Target All: OFF"
+			toggleButtonLoopAll.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+			if LOOPPROTECT then pcall(function() LOOPPROTECT:Destroy() end) LOOPPROTECT = nil end
+		end
+	end)
 end)
 
 if not success then
-    warn("Error while running Loop Target or Loop Target All... :", errorMessage)
+	warn("Error while running Loop Target or Loop Target All... :", errorMessage)
 end
-
 
 
 local DropKickFrame = Instance.new("Frame", scrollFrame)
@@ -1108,11 +1058,8 @@ addCorner(DropKickValueBox, 6)
 local DropKickEnabled = false
 
 MouseButtonFix(DropKickButton, function()
-
     pcall(function()
-
         DropKickEnabled = not DropKickEnabled
-
         if DropKickEnabled then
             DropKickButton.Text = "Drop Kick: ON"
             DropKickButton.BackgroundColor3 = Color3.fromRGB(220,40,40)
@@ -1120,22 +1067,16 @@ MouseButtonFix(DropKickButton, function()
             DropKickButton.Text = "Drop Kick: OFF"
             DropKickButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
         end
-
     end)
-
 end)
 
 local function DropKick()
-
     pcall(function()
-
         local Character = player.Character or player.CharacterAdded:Wait()
         local Humanoid = Character:WaitForChild("Humanoid")
         local Animator = Humanoid:WaitForChild("Animator")
 
-        if Humanoid.Health <= 0 then
-            return
-        end
+        if Humanoid.Health <= 0 then return end
 
         local animation = Instance.new("Animation")
         animation.AnimationId = "rbxassetid://133566007754001"
@@ -1144,68 +1085,41 @@ local function DropKick()
         track:Play()
 
         while track.IsPlaying do
-
             RunService.Heartbeat:Wait()
 
-            local HumanoidRootPart =
-                Character:FindFirstChild("HumanoidRootPart")
+            local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+            if not HumanoidRootPart then break end
 
-            if not HumanoidRootPart then
-                break
-            end
-
-            local Force =
-                tonumber(DropKickValueBox.Text)
-                or 90000000
-
+            local Force = tonumber(DropKickValueBox.Text) or 90000000
             local vel = HumanoidRootPart.Velocity
             local movel = 0.1
 
-            HumanoidRootPart.Velocity =
-                vel * Force +
-                Vector3.new(0, Force, 0)
+            HumanoidRootPart.Velocity = vel * Force + Vector3.new(0, Force, 0)
 
             RunService.RenderStepped:Wait()
-
             if Character and Character.Parent and HumanoidRootPart and HumanoidRootPart.Parent then
                 HumanoidRootPart.Velocity = vel
             end
 
             RunService.Stepped:Wait()
-
             if Character and Character.Parent and HumanoidRootPart and HumanoidRootPart.Parent then
-                HumanoidRootPart.Velocity =
-                    vel + Vector3.new(0, movel, 0)
-
+                HumanoidRootPart.Velocity = vel + Vector3.new(0, movel, 0)
                 movel = -movel
             end
-
         end
 
         animation:Destroy()
-
     end)
-
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-
     pcall(function()
-
-        if gameProcessed then
-            return
-        end
-
-        if not DropKickEnabled then
-            return
-        end
-
+        if gameProcessed then return end
+        if not DropKickEnabled then return end
         if input.KeyCode == Enum.KeyCode.Q then
             task.spawn(DropKick)
         end
-
     end)
-
 end)
 
 
