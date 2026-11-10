@@ -146,7 +146,7 @@ local MainTitle = Instance.new("TextLabel", mainFrame)
 MainTitle.Size = UDim2.new(1, -50, 0, 35)
 MainTitle.Position = UDim2.new(0, 12, 0, 4)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Text = "FLING DELUXE 2.5"
+MainTitle.Text = "FLING DELUXE 2.6"
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 MainTitle.TextSize = 13
 MainTitle.Font = Enum.Font.GothamBold
@@ -1053,6 +1053,161 @@ end)
 if not success then
     warn("Error while running Loop Target or Loop Target All... :", errorMessage)
 end
+
+
+
+local DropKickFrame = Instance.new("Frame", scrollFrame)
+DropKickFrame.Size = UDim2.new(1, -4, 0, 95)
+DropKickFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+DropKickFrame.BorderSizePixel = 0
+addCorner(DropKickFrame, 8)
+
+local DropKickTitle = Instance.new("TextLabel", DropKickFrame)
+DropKickTitle.Size = UDim2.new(1, -20, 0, 25)
+DropKickTitle.Position = UDim2.new(0, 10, 0, 2)
+DropKickTitle.BackgroundTransparency = 1
+DropKickTitle.Text = "DROP KICK FLING"
+DropKickTitle.TextColor3 = Color3.fromRGB(255,255,255)
+DropKickTitle.TextSize = 11
+DropKickTitle.Font = Enum.Font.GothamBold
+DropKickTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local DropKickInfo = Instance.new("TextLabel", DropKickFrame)
+DropKickInfo.Size = UDim2.new(1, -20, 0, 12)
+DropKickInfo.Position = UDim2.new(0, 10, 1, -14)
+DropKickInfo.BackgroundTransparency = 1
+DropKickInfo.Text = "Press Q to use Drop Kick"
+DropKickInfo.TextColor3 = Color3.fromRGB(140,140,140)
+DropKickInfo.TextSize = 9
+DropKickInfo.Font = Enum.Font.GothamMedium
+DropKickInfo.TextXAlignment = Enum.TextXAlignment.Left
+
+local DropKickButton = Instance.new("TextButton", DropKickFrame)
+DropKickButton.Size = UDim2.new(1, -90, 0, 28)
+DropKickButton.Position = UDim2.new(0, 10, 0, 38)
+DropKickButton.Text = "Drop Kick: OFF"
+DropKickButton.TextSize = 10
+DropKickButton.TextColor3 = Color3.fromRGB(255,255,255)
+DropKickButton.Font = Enum.Font.GothamMedium
+DropKickButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
+DropKickButton.BorderSizePixel = 0
+addCorner(DropKickButton, 6)
+
+local DropKickValueBox = Instance.new("TextBox", DropKickFrame)
+DropKickValueBox.Size = UDim2.new(0,65,0,28)
+DropKickValueBox.Position = UDim2.new(1,-75,0,38)
+DropKickValueBox.BackgroundColor3 = Color3.fromRGB(15,15,15)
+DropKickValueBox.Text = "90000000"
+DropKickValueBox.PlaceholderText = "Force"
+DropKickValueBox.TextColor3 = Color3.fromRGB(255,255,255)
+DropKickValueBox.TextSize = 10
+DropKickValueBox.Font = Enum.Font.GothamMedium
+DropKickValueBox.BorderSizePixel = 0
+addCorner(DropKickValueBox, 6)
+
+local DropKickEnabled = false
+
+MouseButtonFix(DropKickButton, function()
+
+    pcall(function()
+
+        DropKickEnabled = not DropKickEnabled
+
+        if DropKickEnabled then
+            DropKickButton.Text = "Drop Kick: ON"
+            DropKickButton.BackgroundColor3 = Color3.fromRGB(220,40,40)
+        else
+            DropKickButton.Text = "Drop Kick: OFF"
+            DropKickButton.BackgroundColor3 = Color3.fromRGB(50,50,50)
+        end
+
+    end)
+
+end)
+
+local function DropKick()
+
+    pcall(function()
+
+        local Character = player.Character or player.CharacterAdded:Wait()
+        local Humanoid = Character:WaitForChild("Humanoid")
+        local Animator = Humanoid:WaitForChild("Animator")
+
+        if Humanoid.Health <= 0 then
+            return
+        end
+
+        local animation = Instance.new("Animation")
+        animation.AnimationId = "rbxassetid://133566007754001"
+
+        local track = Animator:LoadAnimation(animation)
+        track:Play()
+
+        while track.IsPlaying do
+
+            RunService.Heartbeat:Wait()
+
+            local HumanoidRootPart =
+                Character:FindFirstChild("HumanoidRootPart")
+
+            if not HumanoidRootPart then
+                break
+            end
+
+            local Force =
+                tonumber(DropKickValueBox.Text)
+                or 90000000
+
+            local vel = HumanoidRootPart.Velocity
+            local movel = 0.1
+
+            HumanoidRootPart.Velocity =
+                vel * Force +
+                Vector3.new(0, Force, 0)
+
+            RunService.RenderStepped:Wait()
+
+            if Character and Character.Parent and HumanoidRootPart and HumanoidRootPart.Parent then
+                HumanoidRootPart.Velocity = vel
+            end
+
+            RunService.Stepped:Wait()
+
+            if Character and Character.Parent and HumanoidRootPart and HumanoidRootPart.Parent then
+                HumanoidRootPart.Velocity =
+                    vel + Vector3.new(0, movel, 0)
+
+                movel = -movel
+            end
+
+        end
+
+        animation:Destroy()
+
+    end)
+
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+
+    pcall(function()
+
+        if gameProcessed then
+            return
+        end
+
+        if not DropKickEnabled then
+            return
+        end
+
+        if input.KeyCode == Enum.KeyCode.Q then
+            task.spawn(DropKick)
+        end
+
+    end)
+
+end)
+
 
 local AntiFlingFrame = Instance.new("Frame", scrollFrame)
 AntiFlingFrame.Size = UDim2.new(1, -4, 0, 80)
