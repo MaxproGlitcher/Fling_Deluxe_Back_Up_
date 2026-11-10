@@ -42,6 +42,7 @@ Features included:
 * Walk Fling
 * Loop Target Fling
 * Loop Target Fling All
+* DROP KICK FLING
 * Anti Fling
 
 ## Security & Transparency
